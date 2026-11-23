@@ -1,4 +1,4 @@
-const C = 'droplink-v4';
+const C = 'droplink-v5';
 const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png',
   'https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js',
   'https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js',
@@ -45,7 +45,11 @@ self.addEventListener('fetch', e => {
 
 self.addEventListener('notificationclick', e => {
   e.notification.close();
-  e.waitUntil(clients.matchAll({ type: 'window', includeUncontrolled: true }).then(l => l[0] ? l[0].focus() : clients.openWindow('./')));
+  if (e.action === 'dismiss') return;
+  e.waitUntil(clients.matchAll({ type: 'window', includeUncontrolled: true }).then(l => {
+    if (e.action === 'reply' && e.reply) { l.forEach(c => c.postMessage({ t: 'reply', text: e.reply })); return l[0] ? undefined : clients.openWindow('./'); }
+    return l[0] ? l[0].focus() : clients.openWindow('./');
+  }));
 });
 
 // Push from a server (works even when the app is closed, once a push server is connected)

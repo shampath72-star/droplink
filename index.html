@@ -175,6 +175,7 @@ body:not([data-s=on]) .needs{opacity:.35;pointer-events:none}
 #cele .ck{fill:none;stroke:var(--ok);stroke-width:7;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:80;stroke-dashoffset:80;animation:ckd .4s .5s forwards}
 @keyframes ckd{to{stroke-dashoffset:0}}
 @media(prefers-reduced-motion:reduce){*{animation-duration:.01s!important;animation-iteration-count:1!important}}
+.rq{border-left:3px solid var(--a3);padding:2px 8px;margin-bottom:4px;opacity:.8;font-size:.8rem}.tk{font-style:normal;margin-left:4px}.tk.s{color:var(--a3)}#typing,#rpl{font-size:.75rem;opacity:.8;min-height:1rem;padding:0 6px}#rpl{display:flex;justify-content:space-between}#ov{width:100%;margin:8px 0}
 </style>
 </head>
 <body data-s="off" data-role="">
@@ -216,13 +217,13 @@ body:not([data-s=on]) .needs{opacity:.35;pointer-events:none}
     <button class="sec hidden" id="bQR">QR</button></header>
   <div class="main">
     <div class="pane" id="p-chat" style="padding-bottom:0">
-      <div id="msgs"></div>
+      <input type="text" id="qs" placeholder="🔍 Search messages" style="margin-bottom:6px"><div id="msgs"></div><div id="typing"></div><div id="rpl" class="hidden"><span id="rplt"></span><b id="rplx" style="cursor:pointer">✕</b></div>
       <div class="bar" style="padding-inline:0"><input type="text" id="cin" placeholder="Message (sent when online)"><button id="bSend">Send</button></div>
     </div>
     <div class="pane hidden" id="p-files">
-      <div class="drop" id="drop"><div class="row" style="justify-content:center"><button id="bFile">📄 Send files</button><button class="sec" id="bPhoto">🖼 Send photos</button></div><div class="mut" style="margin-top:8px">You can also drag files here</div></div>
-      <input type="file" id="fFile" multiple hidden><input type="file" id="fPhoto" accept="image/*" multiple hidden>
-      <div id="trs" style="display:flex;flex-direction:column;gap:8px"><div class="mut">No transfers yet. Received files appear here with a Save button.</div></div>
+      <div class="drop" id="drop"><div class="row" style="justify-content:center"><button id="bFile">📄 Send files</button><button class="sec" id="bPhoto">🖼 Send photos</button><button class="sec" id="bDir">📂 Send folder</button></div><div class="mut" style="margin-top:8px">You can also drag files here</div></div>
+      <input type="file" id="fDir" webkitdirectory multiple hidden><input type="file" id="fFile" multiple hidden><input type="file" id="fPhoto" accept="image/*" multiple hidden>
+      <progress id="ov" class="hidden" max="1" value="0"></progress><input type="text" id="qf" placeholder="🔍 Search files" style="margin:6px 0"><div id="trs" style="display:flex;flex-direction:column;gap:8px"><div class="mut">No transfers yet. Received files appear here with a Save button.</div></div>
     </div>
     <div class="pane hidden" id="p-dev">
       <div class="card hidden" id="offnote"><b>OFFLINE</b><span id="offtxt">We will notify you the moment it is back online.</span></div>
@@ -241,6 +242,7 @@ body:not([data-s=on]) .needs{opacity:.35;pointer-events:none}
       <div class="card needs"><b>REMOTE ACTIONS</b>
         <div class="g">
           <button class="tile sec" id="bRing"><span>🔔</span><em class="lbl">Ring</em></button>
+          <button class="tile sec" id="bClip"><span>📋</span>Send clipboard</button>
           <button class="tile sec ho" id="bTorch"><span>🔦</span>Flashlight</button>
           <button class="tile sec ho" id="bVib"><span>📳</span>Vibrate</button>
           <button class="tile sec ho" id="bCam"><span>📷</span>Phone camera</button>
@@ -287,7 +289,7 @@ const DEF={preset:'aurora',mode:'dark',bgMode:'gradient',c1:'#0a0b18',c2:'#312e8
  appName:'DropLink',devName:'',
  logoShape:'squircle',logoStyle:'radar',l1:'#1e1b4b',l2:'#6366f1',lfg:'#ffffff',ring:14,logoText:'D',logoAnim:true,
  sound:true,vib:true,notif:true,wake:null,every:5,shLoc:true,shBat:true,shNet:true,shIP:true,shDev:true,
- turnUrl:'',turnUser:'',turnPass:'',relay:false};
+ turnUrl:'',turnUser:'',turnPass:'',relay:false,clip:false,alerts:true,dnd:false,dndFrom:'22:00',dndTo:'07:00'};
 const PRESETS={
  aurora:{c1:'#0a0b18',c2:'#312e81',c3:'#0e7490',a1:'#6366f1',a2:'#8b5cf6',a3:'#22d3ee',l1:'#1e1b4b',l2:'#6366f1'},
  sunset:{c1:'#16080f',c2:'#7c2d12',c3:'#9d174d',a1:'#f97316',a2:'#ec4899',a3:'#facc15',l1:'#7c2d12',l2:'#f97316'},
@@ -392,10 +394,12 @@ function rows(el,a){el.innerHTML='';a.forEach(([k,v])=>{if(v==null||v==='')retur
 // sound + notifications
 let actx;function unlockAudio(){try{actx=actx||new(window.AudioContext||window.webkitAudioContext)();actx.resume()}catch{}}
 document.addEventListener('pointerdown',unlockAudio);
-function chime(){if(!actx||!S.sound)return;[660,880].forEach((f,i)=>{const o=actx.createOscillator(),g=actx.createGain(),t=actx.currentTime+i*.14;o.frequency.value=f;g.gain.setValueAtTime(.15,t);g.gain.exponentialRampToValueAtTime(.001,t+.25);o.connect(g);g.connect(actx.destination);o.start(t);o.stop(t+.26)})}
+const tm=s=>{const a=String(s).split(':');return a[0]*60+ +a[1]},dnd=()=>{if(!S.dnd)return false;const n=new Date(),m=n.getHours()*60+n.getMinutes(),f=tm(S.dndFrom),t=tm(S.dndTo);return f<=t?m>=f&&m<t:m>=f||m<t};
+function chime(){if(!actx||!S.sound||dnd())return;[660,880].forEach((f,i)=>{const o=actx.createOscillator(),g=actx.createGain(),t=actx.currentTime+i*.14;o.frequency.value=f;g.gain.setValueAtTime(.15,t);g.gain.exponentialRampToValueAtTime(.001,t+.25);o.connect(g);g.connect(actx.destination);o.start(t);o.stop(t+.26)})}
 function askNotif(){try{if('Notification'in window&&Notification.permission==='default')Notification.requestPermission()}catch{}}
-function notify(t,b){toast(t);chime();if(S.vib&&navigator.vibrate)navigator.vibrate(120);
-  if(S.notif&&(document.hidden||!document.hasFocus())&&window.Notification&&Notification.permission==='granted')navigator.serviceWorker.ready.then(r=>r.showNotification(t,{body:b||'',icon:'icon-192.png',badge:'icon-192.png',tag:'dl-'+Date.now(),renotify:true,vibrate:[120,60,120],data:{t:Date.now()}})).catch(()=>{})}
+function notify(t,b,chat){if(!dnd())toast(t);chime();if(dnd())return;if(S.vib&&navigator.vibrate)navigator.vibrate(120);
+  if(S.notif&&(document.hidden||!document.hasFocus())&&window.Notification&&Notification.permission==='granted'){const a=[{action:'open',title:'Open'},{action:'dismiss',title:'Dismiss'}];if(chat)a.unshift({action:'reply',type:'text',title:'Reply',placeholder:'Type a reply'});
+    navigator.serviceWorker.ready.then(r=>r.showNotification(t,{body:b||'',icon:'icon-192.png',badge:'icon-192.png',tag:'dl-'+Date.now(),renotify:true,vibrate:[120,60,120],actions:a,data:{t:Date.now()}})).catch(()=>{})}}
 
 // presence
 const N=()=>peerName||(role==='host'?'Phone':'PC');
@@ -508,12 +512,12 @@ function onUp(rep){
   show('app');stopScan();LS.set('dl_paired','1');setPresence('on');
   if(!rep){notify(N()+' is online',role==='host'?'Your phone is connected':'Connected to your PC');if(first)celebrate()}
   send({t:'hello',pid:peer&&peer.id,name:devName(),key:role==='guest'?key:undefined},1);
-  outbox.splice(0).forEach(o=>{send({t:'chat',text:o.rec.t,ts:o.rec.ts},1);o.rec.q=0;o.el.classList.remove('q')});saveChat();
+  outbox.splice(0).forEach(o=>{send({t:'chat',text:o.rec.t,ts:o.rec.ts,id:o.rec.id,re:o.rec.re},1);o.rec.q=0;o.el.classList.remove('q');paintTick(o.rec,o.el)});saveChat();
   startSensors();sendStatus(1);setTimeout(linkProbe,1500);
 }
 function onDown(){
   lastSeen=Date.now();LS.set('dl_seen',lastSeen);rtt=null;linkKind='';
-  if(!denied)setPresence('off');toast(N()+' went offline');
+  if(!denied)setPresence('off');S.alerts?notify(N()+' went offline'):toast(N()+' went offline');
   ring(false);ringOut=false;paintRing();stopCam();torch(false,1);setView(false);
   Object.keys(incoming).forEach(k=>{incoming[k].row.st.textContent='Interrupted: connection lost';delete incoming[k]});
   if(lastSt)renderStatus(lastSt,1);
@@ -528,7 +532,11 @@ function onData(m){
     case 'pong':rtt=Math.max(1,Date.now()-m.n);paintStat();break;
     case 'hello':otherPid=m.pid;if(m.name){peerName=m.name;paintStat()}break;
     case 'deny':denied=true;clearTimeout(retryT);toast('Pairing key rejected. Scan the QR code on your PC again.');setPresence('off','Pairing rejected. Scan the QR again.');break;
-    case 'chat':{const rec={t:m.text,me:0,ts:Date.now()};chat.push(rec);saveChat();addMsg(rec);if(document.hidden||!document.hasFocus())notify(N(),m.text);else chime();if($('#p-chat').classList.contains('hidden')){unread++;badge()}break}
+    case 'chat':{const rec={t:m.text,me:0,ts:Date.now(),id:m.id,re:m.re};chat.push(rec);saveChat();addMsg(rec);if(document.hidden||!document.hasFocus())notify(N(),m.text,1);else chime();if($('#p-chat').classList.contains('hidden')){unread++;badge()}else sendSeen();break}
+    case 'seen':m.ids.forEach(i=>{const r=chat.find(x=>x.id===i);if(r){r.s=1;const e=$('#msgs [data-id="'+i+'"]');e&&paintTick(r,e)}});saveChat();break;
+    case 'del':{const r=chat.find(x=>x.id===m.id);chat=chat.filter(x=>x!==r);const e=$('#msgs [data-id="'+m.id+'"]');e&&e.remove();saveChat();break}
+    case 'typing':{const e=$('#typing');e.textContent=N()+' is typing…';clearTimeout(onData.ty);onData.ty=setTimeout(()=>e.textContent='',3000);break}
+    case 'clip':clipIn(m.text);break;
     case 'status':m.rx=Date.now();renderStatus(m);storeLast(m);break;
     case 'alarm':ring(m.on);break;
     case 'alarmoff':ringOut=false;paintRing();break;
@@ -548,9 +556,25 @@ function badge(){const b=$('#bg');b.textContent=unread;b.classList.toggle('hidde
 
 // chat
 function saveChat(){if(chat.length>200)chat=chat.slice(-200);LS.set('dl_chat',JSON.stringify(chat))}
-function addMsg(r){const d=document.createElement('div');d.className='m'+(r.me?' me':'');const t=document.createElement('span');t.textContent=r.t;const s=document.createElement('small');s.textContent=new Date(r.ts).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});d.append(t,s);const b=$('#msgs');b.appendChild(d);b.scrollTop=b.scrollHeight;return d}
-function sendChat(){const t=$('#cin').value.trim();if(!t)return;$('#cin').value='';const rec={t,me:1,ts:Date.now()};chat.push(rec);const el=addMsg(rec);
-  if(!send({t:'chat',text:t,ts:rec.ts},1)){rec.q=1;el.classList.add('q');outbox.push({rec,el})}saveChat()}
+let replyTo=null,lowSent=0,lastClip='',ov={d:0,n:1};
+function paintTick(r,d){const k=d.querySelector('.tk');if(!k)return;k.textContent=r.me?(r.q?'🕓':r.s?'✓✓':'✓'):'';k.classList.toggle('s',!!r.s)}
+function addMsg(r){r.id=r.id||rid(8);const d=document.createElement('div');d.className='m'+(r.me?' me':'');d.dataset.id=r.id;
+  if(r.re){const q=document.createElement('div');q.className='rq';q.textContent=String(r.re.t).slice(0,80);d.append(q)}
+  const t=document.createElement('span');t.textContent=r.t;const s=document.createElement('small');s.textContent=new Date(r.ts).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});const k=document.createElement('i');k.className='tk';s.append(k);d.append(t,s);
+  d.onclick=()=>sheet('Message',r.t,[['Reply',()=>{replyTo={id:r.id,t:r.t};$('#rplt').textContent='↩ '+r.t.slice(0,60);$('#rpl').classList.remove('hidden');$('#cin').focus()}],['Copy',()=>navigator.clipboard&&navigator.clipboard.writeText(r.t)],['Delete',()=>{chat=chat.filter(x=>x!==r);d.remove();saveChat();if(r.me)send({t:'del',id:r.id},1)},'bad'],['Close',null,'sec']]);
+  paintTick(r,d);const b=$('#msgs');b.appendChild(d);b.scrollTop=b.scrollHeight;return d}
+function sendSeen(){if(!conn||!conn.open||$('#p-chat').classList.contains('hidden')||document.hidden||$('#app').classList.contains('hidden'))return;const ids=chat.filter(r=>!r.me&&r.id&&!r.sn).map(r=>(r.sn=1,r.id));if(ids.length){send({t:'seen',ids},1);saveChat()}}
+$('#rplx').onclick=()=>{replyTo=null;$('#rpl').classList.add('hidden')};
+$('#qs').oninput=e=>{const q=e.target.value.toLowerCase();$$('#msgs .m').forEach(x=>x.style.display=!q||x.textContent.toLowerCase().includes(q)?'':'none')};
+$('#qf').oninput=e=>{const q=e.target.value.toLowerCase();$$('#trs .tr').forEach(x=>x.style.display=!q||x.textContent.toLowerCase().includes(q)?'':'none')};
+let typT=0;$('#cin').addEventListener('input',()=>{if(Date.now()-typT>2000){typT=Date.now();send({t:'typing'},1)}});
+addEventListener('focus',()=>{sendSeen();clipOut()});document.addEventListener('visibilitychange',()=>{if(!document.hidden){sendSeen();clipOut()}});
+async function clipOut(m){try{const t=await navigator.clipboard.readText();if(t&&t!==lastClip&&(m||S.clip)){lastClip=t;if(send({t:'clip',text:t.slice(0,20000)},1)&&m)toast('Clipboard sent')}else if(m)toast(t?'Already sent':'Clipboard is empty')}catch{if(m)toast('Allow clipboard access to send it')}}
+function clipIn(x){lastClip=x;const w=()=>navigator.clipboard.writeText(x).then(()=>toast('Clipboard updated from '+N()));if(S.clip&&document.hasFocus())w().catch(()=>{});else sheet('Clipboard from '+N(),x.slice(0,300),[['Copy',()=>w().catch(()=>{})],['Dismiss',null,'sec']])}
+$('#bClip').onclick=()=>clipOut(1);$('#bDir').onclick=()=>$('#fDir').click();$('#fDir').onchange=e=>{sendFiles([...e.target.files]);e.target.value=''};
+navigator.serviceWorker&&navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.t==='reply')sendChat(e.data.text)});
+function sendChat(txt){const t=(typeof txt==='string'?txt:$('#cin').value).trim();if(!t)return;if(typeof txt!=='string')$('#cin').value='';const rec={t,me:1,ts:Date.now(),id:rid(8),re:replyTo};replyTo=null;$('#rpl').classList.add('hidden');chat.push(rec);const el=addMsg(rec);
+  if(!send({t:'chat',text:t,ts:rec.ts,id:rec.id,re:rec.re},1)){rec.q=1;paintTick(rec,el);el.classList.add('q');outbox.push({rec,el})}saveChat()}
 
 // files
 function addTransfer(name,size,sending){
@@ -561,17 +585,17 @@ function addTransfer(name,size,sending){
 }
 async function sendFile(file){
   if(!conn||!conn.open){toast(N()+' is offline. Try again when it is online.');return}
-  const id=Math.random().toString(36).slice(2),CH=64*1024,row=addTransfer(file.name,file.size,1),t0=Date.now();
-  if(!send({t:'fstart',id,name:file.name,size:file.size,type:file.type}))return;
+  const id=Math.random().toString(36).slice(2),CH=64*1024,nm=file.webkitRelativePath||file.name,row=addTransfer(nm,file.size,1),t0=Date.now();
+  if(!send({t:'fstart',id,name:nm,size:file.size,type:file.type}))return;
   for(let o=0;o<file.size;o+=CH){
     while(conn&&conn.open&&conn.dataChannel&&conn.dataChannel.bufferedAmount>4e6)await sleep(10);
     if(!conn||!conn.open){row.st.textContent='Failed: connection lost';return}
     try{conn.send({t:'chunk',id,d:await file.slice(o,o+CH).arrayBuffer()})}catch{row.st.textContent='Failed: connection lost';return}
-    row.bar.value=Math.min(1,(o+CH)/file.size);row.st.textContent=fmt((o+CH)/Math.max(.2,(Date.now()-t0)/1000))+'/s';
+    row.bar.value=Math.min(1,(o+CH)/file.size);ov.d+=Math.min(CH,file.size-o);$('#ov').value=Math.min(1,ov.d/ov.n);row.st.textContent=fmt((o+CH)/Math.max(.2,(Date.now()-t0)/1000))+'/s';
   }
   send({t:'fend',id});row.bar.value=1;row.st.textContent='Sent ✓';
 }
-async function sendFiles(l){for(const f of l)await sendFile(f)}
+async function sendFiles(l){l=[...l];const o=$('#ov');ov={d:0,n:l.reduce((a,f)=>a+f.size,0)||1};o.value=0;if(l.length>1)o.classList.remove('hidden');for(const f of l)await sendFile(f);o.value=1;setTimeout(()=>o.classList.add('hidden'),1500)}
 addEventListener('dragover',e=>{e.preventDefault();$('#drop').style.borderColor='var(--a3)'});
 addEventListener('dragleave',()=>$('#drop').style.borderColor='');
 addEventListener('drop',e=>{e.preventDefault();$('#drop').style.borderColor='';if(e.dataTransfer.files.length&&!$('#app').classList.contains('hidden')){tab('files');sendFiles([...e.dataTransfer.files])}});
@@ -626,8 +650,8 @@ document.addEventListener('visibilitychange',()=>{wl=null;if(!document.hidden&&w
 // other device's status
 let lastSt=null,lastMapKey='';
 function storeLast(s){if(Date.now()-(storeLast.t||0)<5000)return;storeLast.t=Date.now();LS.set('dl_last',JSON.stringify(s))}
-function renderStatus(s){
-  lastSt=s;if(s.name){peerName=s.name;paintStat()}
+function renderStatus(s,cached){
+  lastSt=s;if(!cached&&S.alerts&&role==='host'&&s.battery!=null){if(s.battery<=15&&!s.charging){if(!lowSent){lowSent=1;notify('Phone at '+s.battery+'%','Plug it in soon')}}else if(s.battery>20||s.charging)lowSent=0}if(s.name){peerName=s.name;paintStat()}
   const b=s.battery,gv=$('#gv');
   $('#bpct').textContent=b==null?'—':b+'%';
   gv.style.strokeDashoffset=213.6*(1-(b||0)/100);
@@ -655,7 +679,7 @@ function ring(on){
   $('#alarm').classList.toggle('hidden',!on);
   if(on){$('#alarmtxt').textContent=N()+' is ringing this device';unlockAudio();
     if(S.sound&&actx&&!osc){osc=actx.createOscillator();lfo=actx.createOscillator();const g=actx.createGain(),lg=actx.createGain();
-      osc.type='square';osc.frequency.value=900;lfo.frequency.value=2;lg.gain.value=300;g.gain.value=.6;
+      osc.type='square';osc.frequency.value=900;lfo.frequency.value=2;lg.gain.value=300;g.gain.value=1;
       lfo.connect(lg);lg.connect(osc.frequency);osc.connect(g);g.connect(actx.destination);osc.start();lfo.start()}
     if(S.vib&&!vib)vib=setInterval(()=>navigator.vibrate&&navigator.vibrate(600),1000);
   }else{try{osc&&osc.stop();lfo&&lfo.stop()}catch{}osc=lfo=null;clearInterval(vib);vib=null;navigator.vibrate&&navigator.vibrate(0)}
@@ -749,7 +773,7 @@ const TABS=[
   C('l1','Logo colour 1'),C('l2','Logo colour 2'),C('lfg','Symbol colour'),R('ring','Symbol thickness',6,26,1),
   X('logoText','Letter / emoji (up to 3)','D'),I('logo','Logo picture'),W('logoAnim','Animate logo'),
   T('The logo shows in the splash screen, header and menu, and sets the browser tab icon. The installed app icon on your home screen comes from icon-192.png / icon-512.png: replace those files and reinstall to change it.')]],
- ['App',[X('appName','App name','DropLink'),X('devName','This device’s name (shown on the other device)','PC / Phone'),W('sound','Sounds'),W('vib','Vibration'),W('notif','Desktop / phone notifications'),
+ ['App',[X('appName','App name','DropLink'),X('devName','This device’s name (shown on the other device)','PC / Phone'),W('sound','Sounds'),W('vib','Vibration'),W('notif','Desktop / phone notifications'),W('clip','Sync clipboard automatically (when you switch back to this app)'),W('alerts','Low battery & offline alerts'),W('dnd','Do Not Disturb schedule (mutes sounds & popups)'),{t:'time',k:'dndFrom',l:'DND from'},{t:'time',k:'dndTo',l:'DND until'},
   W('wake','Keep this screen on (recommended on the phone)'),G('every','Send status every',[[2,'2 s'],[5,'5 s'],[10,'10 s'],[30,'30 s']])]],
  ['Share',[T('Choose what this device shares with the other one.'),W('shBat','Battery'),W('shLoc','Location'),W('shNet','Network type & speed'),W('shIP','Public IP, provider & city'),W('shDev','Device info & storage')]],
  ['Connection',[T('DropLink uses a direct peer-to-peer link when it can. If a network blocks that (some mobile data / office Wi‑Fi), it falls back to a relay. A free public relay is built in, but it can be slow or rate-limited; for rock-solid links add your own free TURN server (for example from metered.ca or Cloudflare).'),
@@ -774,6 +798,7 @@ function ctl(f){
     case 'sw':{const i=document.createElement('input');i.type='checkbox';i.checked=!!val();i.onchange=()=>{S[f.k]=i.checked;changed(f.k)};w.append(lab,i);break}
     case 'seg':{const d=document.createElement('div');d.className='seg';f.o.forEach(([v,l])=>{const b=btn(l,()=>{S[f.k]=v;[...d.children].forEach(x=>x.classList.toggle('on',x===b));changed(f.k)},'sec'+(String(S[f.k])===String(v)?' on':''));d.appendChild(b)});w.append(lab,d);break}
     case 'text':{const i=document.createElement('input');i.type=f.pw?'password':'text';i.value=S[f.k]||'';i.placeholder=f.ph||'';i.oninput=()=>{S[f.k]=i.value;changed(f.k)};w.append(lab,i);break}
+    case 'time':{const i=document.createElement('input');i.type='time';i.value=S[f.k];i.oninput=()=>{S[f.k]=i.value;changed(f.k)};w.append(lab,i);break}
     case 'btn':w.append(btn(f.l,f.f,f.cls));break;
     case 'note':w.className='note';w.textContent=f.l;break;
     case 'img':{const inp=document.createElement('input');inp.type='file';inp.accept='image/*';inp.hidden=true;
@@ -796,7 +821,7 @@ function renderSet(){
 }
 
 // ---------- UI wiring ----------
-function tab(t){$$('nav button').forEach(x=>x.classList.toggle('on',x.dataset.t===t));['chat','files','dev'].forEach(x=>$('#p-'+x).classList.toggle('hidden',x!==t));if(t==='chat'){unread=0;badge()}}
+function tab(t){$$('nav button').forEach(x=>x.classList.toggle('on',x.dataset.t===t));['chat','files','dev'].forEach(x=>$('#p-'+x).classList.toggle('hidden',x!==t));if(t==='chat'){unread=0;badge();sendSeen()}}
 $$('nav button').forEach(b=>b.onclick=()=>tab(b.dataset.t));
 $('#gear').onclick=()=>{renderSet();$('#set').classList.remove('hidden')};
 $('#bSetDone').onclick=()=>$('#set').classList.add('hidden');
