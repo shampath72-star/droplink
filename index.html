@@ -5,57 +5,101 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>DropLink</title>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#1e1b4b">
+<meta name="theme-color" content="#0a0b18">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://0.peerjs.com" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <style>
-:root{--bg:#0f1020;--card:#1b1d36;--fg:#eef0ff;--mut:#9aa0c8;--acc:#6366f1;--ok:#22c55e;--bad:#ef4444}
-*{box-sizing:border-box}
+:root{--bg:#0a0b18;--s1:#ffffff0e;--s2:#ffffff1a;--ln:#ffffff1c;--fg:#eef0ff;--mut:#9ba0c9;--ok:#34d399;--bad:#fb7185;--warn:#fbbf24;--g:linear-gradient(135deg,#6366f1,#8b5cf6 60%,#22d3ee)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;margin:0}
-body{background:var(--bg);color:var(--fg);font:16px system-ui,-apple-system,sans-serif;display:flex;flex-direction:column;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+body{background:radial-gradient(900px 500px at 10% -10%,#312e8166,transparent),radial-gradient(700px 500px at 100% 110%,#0e749055,transparent),var(--bg);color:var(--fg);font:15px/1.45 "Segoe UI Variable","Segoe UI",system-ui,-apple-system,sans-serif;display:flex;flex-direction:column;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
 .hidden{display:none!important}
-button,input{font:inherit}
-button{background:var(--acc);color:#fff;border:0;border-radius:12px;padding:12px 18px;cursor:pointer}
-button.sec{background:var(--card);color:var(--fg);border:1px solid #33365a}
+button,input{font:inherit;color:inherit}
+button{background:var(--g);color:#fff;border:0;border-radius:14px;padding:12px 18px;cursor:pointer;font-weight:600;transition:transform .12s,opacity .2s}
+button:active{transform:scale(.96)}
+button:focus-visible,input:focus-visible{outline:2px solid #a5b4fc;outline-offset:2px}
+button.sec{background:var(--s2);border:1px solid var(--ln)}
 button.bad{background:var(--bad)}
-input[type=text]{background:var(--card);color:var(--fg);border:1px solid #33365a;border-radius:12px;padding:12px;width:100%}
+input[type=text]{background:var(--s1);border:1px solid var(--ln);border-radius:14px;padding:12px 14px;width:100%}
 .screen{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center;overflow:auto}
-.screen h1{margin:0;font-size:2rem}
+.screen h1{margin:0;font-size:2.2rem;letter-spacing:-.02em}
 .mut{color:var(--mut);font-size:.9rem}
-.big{width:100%;max-width:320px;padding:16px;font-size:1.1rem}
-#qr img{width:260px;height:260px;image-rendering:pixelated;background:#fff;padding:8px;border-radius:12px}
-#pairurl{word-break:break-all;max-width:360px;font-size:.75rem}
-video{width:100%;max-width:360px;border-radius:12px;background:#000}
-header{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--card)}
-.dot{width:10px;height:10px;border-radius:50%;background:var(--bad)}
-.dot.ok{background:var(--ok)}
-header span{flex:1}
-nav{display:flex;background:var(--card)}
-nav button{flex:1;background:none;color:var(--mut);border-radius:0;padding:14px 4px}
-nav button.on{color:#fff;border-top:3px solid var(--acc)}
-.pane{flex:1;min-height:0;display:flex;flex-direction:column}
-#msgs{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:6px}
-.m{max-width:80%;padding:9px 13px;border-radius:14px;background:var(--card);align-self:flex-start;white-space:pre-wrap;word-break:break-word}
-.m.me{background:var(--acc);align-self:flex-end}
-.bar{display:flex;gap:8px;padding:8px}
-.card{background:var(--card);border-radius:14px;padding:14px;margin:8px 12px}
-.card b{display:block;color:var(--mut);font-size:.8rem;margin-bottom:4px}
-.row{display:flex;gap:10px;align-items:center;margin:8px 12px;flex-wrap:wrap}
-.tr{background:var(--card);border-radius:12px;padding:10px 12px;margin:6px 12px}
-.tr progress{width:100%;height:8px}
-.tr a{color:#a5b4fc}
-iframe{width:100%;height:220px;border:0;border-radius:10px;margin-top:8px}
+.big{width:100%;max-width:340px;padding:16px;font-size:1.05rem}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+#qr img{width:240px;height:240px;image-rendering:pixelated;background:#fff;padding:10px;border-radius:20px;box-shadow:0 0 60px #6366f166}
+#pairurl{word-break:break-all;max-width:360px;font-size:.72rem}
+video{width:100%;max-width:420px;border-radius:16px;background:#000}
+/* logo */
+.logo{display:block;overflow:visible;filter:drop-shadow(0 6px 22px #6366f188)}
+.logo .ring{fill:none;stroke:#fff;stroke-width:14;stroke-dasharray:283;transform-origin:96px 96px;animation:draw 1s cubic-bezier(.6,0,.2,1) both,spin 14s 1s linear infinite}
+.logo .dot{fill:#fff;transform-origin:96px 96px;animation:pop .6s .7s cubic-bezier(.3,1.7,.5,1) both,beat 2.4s 1.5s infinite}
+.logo .rp{fill:none;stroke:#fff;stroke-width:3;opacity:0;transform-origin:96px 96px;animation:rip 2.4s 1.2s infinite ease-out}
+.logo .rp.d{animation-delay:2.4s}
+@keyframes draw{from{stroke-dashoffset:283}to{stroke-dashoffset:0}}
+@keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+@keyframes beat{50%{transform:scale(1.25)}}
+@keyframes rip{from{transform:scale(1);opacity:.55}to{transform:scale(1.75);opacity:0}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pu{70%{box-shadow:0 0 0 8px #34d39900}}
+#splash{position:fixed;inset:0;z-index:20;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity .5s,transform .5s}
+#splash.out{opacity:0;transform:scale(1.08);pointer-events:none}
+#splash h2{margin:0;font-weight:600;letter-spacing:.3em;font-size:1.1rem;animation:fi 1s .8s both}
+@keyframes fi{from{opacity:0}}
+body[data-s=on] #hdr .dot,body[data-s=on] nav .logo .dot{fill:#4ade80}
+body[data-s=off] #hdr .logo,body[data-s=off] nav .logo{filter:grayscale(1) opacity(.6)}
+body[data-s=off] .logo .rp{animation-play-state:paused}
+/* shell */
+#app{flex:1;min-height:0;display:grid;grid-template:"h" auto "m" 1fr "n" auto/minmax(0,1fr)}
+header{grid-area:h;display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--ln);background:#0a0b18cc;backdrop-filter:blur(14px)}
+header div{flex:1;line-height:1.2}header small{display:block;color:var(--mut);font-size:.78rem}
+header button{padding:8px 12px;font-size:.85rem}
+#pill{width:11px;height:11px;border-radius:50%;background:var(--mut)}
+[data-s=on] #pill{background:var(--ok);animation:pu 2s infinite}[data-s=wait] #pill{background:var(--warn)}[data-s=off] #pill{background:var(--bad)}
+.main{grid-area:m;min-height:0;display:flex;flex-direction:column;width:100%;max-width:900px;margin:0 auto}
+.pane{flex:1;min-height:0;display:flex;flex-direction:column;overflow:auto;padding:12px;gap:10px}
+nav{grid-area:n;display:flex;background:#0a0b18e6;border-top:1px solid var(--ln);padding:6px}
+nav .brand{display:none}
+nav button{flex:1;background:none;color:var(--mut);padding:8px 4px;font-size:.78rem;display:flex;flex-direction:column;align-items:center;gap:2px;border-radius:14px;position:relative}
+nav button span{font-size:1.3rem}
+nav button.on{color:#fff;background:var(--s2)}
+nav i{position:absolute;top:2px;right:28%;background:var(--bad);border-radius:9px;font-style:normal;font-size:.7rem;padding:0 6px}
+@media(min-width:820px){#app{grid-template:"n h" auto "n m" 1fr/230px minmax(0,1fr)}nav{flex-direction:column;border-top:0;border-right:1px solid var(--ln);padding:18px 12px;gap:6px}nav .brand{display:block;margin:6px auto 22px}nav button{flex:none;flex-direction:row;font-size:.95rem;gap:12px;padding:12px 14px;justify-content:flex-start}}
+.card{background:var(--s1);border:1px solid var(--ln);border-radius:18px;padding:14px 16px;backdrop-filter:blur(14px)}
+.card b{display:block;color:var(--mut);font-size:.78rem;font-weight:600;margin-bottom:4px}
+.card a{color:#a5b4fc}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.meter{height:6px;background:var(--s2);border-radius:4px;margin:6px 0;overflow:hidden}.meter i{display:block;height:100%;width:0;background:var(--g);transition:width .6s}
+.g{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:10px}
+.tile{display:flex;flex-direction:column;align-items:center;gap:6px;background:var(--s1);border:1px solid var(--ln);padding:16px 6px;border-radius:16px;font-size:.85rem}
+.tile span{font-size:1.5rem}.tile.on{background:var(--g)}
+body:not([data-s=on]) .needs{opacity:.35;pointer-events:none}
+#offnote{border-color:#fb718588;background:#fb71851a}
+#msgs{flex:1;overflow:auto;display:flex;flex-direction:column;gap:6px;padding:4px}
+.m{max-width:78%;padding:9px 13px;border-radius:18px 18px 18px 4px;background:var(--s2);align-self:flex-start;white-space:pre-wrap;word-break:break-word}
+.m.me{background:var(--g);align-self:flex-end;border-radius:18px 18px 4px 18px}.m.q{opacity:.55}
+.bar{display:flex;gap:8px;padding:8px 12px 12px}
+.tr{background:var(--s1);border:1px solid var(--ln);border-radius:14px;padding:10px 12px}
+.tr progress{width:100%;height:6px;accent-color:#8b5cf6}.tr a{color:#a5b4fc}.tr img{max-width:100%;max-height:160px;border-radius:10px;margin-top:6px}
+.drop{border:2px dashed var(--ln);border-radius:18px;padding:18px;text-align:center}
 #alarm{position:fixed;inset:0;background:var(--bad);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;z-index:9;animation:f 1s infinite}
 #alarm button{background:#fff;color:#000;font-size:1.4rem;padding:18px 32px}
 @keyframes f{50%{background:#7f1d1d}}
-#toast{position:fixed;left:50%;bottom:80px;transform:translateX(-50%);background:#000c;padding:10px 16px;border-radius:20px;z-index:10;max-width:90%}
+.modal{position:fixed;inset:0;z-index:12;background:#000a;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal .card{background:#14152b;max-width:460px;width:100%;display:flex;flex-direction:column;gap:12px;word-break:break-word}
+#toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#14152bf2;border:1px solid var(--ln);padding:10px 16px;border-radius:20px;z-index:30;max-width:90%}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01s!important;animation-iteration-count:1!important}}
 </style>
 </head>
-<body>
+<body data-s="off">
+<svg width="0" height="0" style="position:absolute"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1e1b4b"/><stop offset="1" stop-color="#6366f1"/></linearGradient></defs></svg>
+<div id="splash"><div data-logo="132"></div><h2>DROPLINK</h2></div>
 
 <div id="home" class="screen hidden">
-  <h1>📲 DropLink</h1>
-  <div class="mut">Connect your phone and PC: chat, share files and photos, see battery, network and location.</div>
+  <div data-logo="96"></div>
+  <h1>DropLink</h1>
+  <div class="mut" style="max-width:340px">Link your phone and PC. Chat, send files, see battery and location, and control your phone from your PC.</div>
   <button class="big" id="bPC">💻 This is my PC</button>
   <button class="big" id="bPhone">📱 This is my phone</button>
   <button class="sec big hidden" id="install">⬇ Install app</button>
@@ -65,9 +109,9 @@ iframe{width:100%;height:220px;border:0;border-radius:10px;margin-top:8px}
 <div id="pair" class="screen hidden">
   <h1>Pair your phone</h1>
   <div id="qr" class="mut">Getting your code…</div>
-  <div>On your phone, open DropLink, tap <b>This is my phone</b> and scan this code.<br>You can also scan it with the phone’s normal Camera app.</div>
+  <div style="max-width:380px">On your phone open DropLink, tap <b>This is my phone</b> and scan this code, or scan it with the phone’s Camera app.</div>
   <div id="pairurl" class="mut"></div>
-  <button class="sec" id="bCopy">Copy link</button>
+  <div class="row"><button class="sec" id="bCopy">Copy link</button><button class="sec hidden" id="bPairBack">Back</button></div>
 </div>
 
 <div id="scan" class="screen hidden">
@@ -75,365 +119,366 @@ iframe{width:100%;height:220px;border:0;border-radius:10px;margin-top:8px}
   <video id="vid" playsinline muted></video>
   <div id="scanmsg" class="mut"></div>
   <div class="mut">Or paste the pairing link:</div>
-  <input type="text" id="paste" placeholder="https://…#join=dl-…">
+  <input type="text" id="paste" placeholder="https://…#join=dl-…" style="max-width:420px">
   <div class="row"><button id="bPaste">Connect</button><button class="sec" id="bScanBack">Back</button></div>
 </div>
 
-<div id="app" class="hidden" style="flex:1;min-height:0;display:flex;flex-direction:column">
-  <header><div class="dot" id="dot"></div><span id="stat">Starting…</span><button class="sec" id="bUnpair">Unpair</button></header>
-
-  <div class="pane" id="p-chat">
-    <div id="msgs"></div>
-    <div class="bar"><input type="text" id="cin" placeholder="Message"><button id="bSend">Send</button></div>
-  </div>
-
-  <div class="pane hidden" id="p-files" style="overflow:auto">
-    <div class="row">
-      <button id="bFile">📄 Send files</button>
-      <button class="sec" id="bPhoto">🖼 Send photos</button>
+<div id="app" class="hidden">
+  <header id="hdr"><span data-logo="32"></span><div><b>DropLink</b><small id="stat">Starting…</small></div><i id="pill"></i>
+    <button class="sec hidden" id="bQR">QR</button><button class="sec" id="bUnpair">Unpair</button></header>
+  <div class="main">
+    <div class="pane" id="p-chat" style="padding-bottom:0">
+      <div id="msgs"></div>
+      <div class="bar" style="padding-inline:0"><input type="text" id="cin" placeholder="Message (sent when online)"><button id="bSend">Send</button></div>
     </div>
-    <input type="file" id="fFile" multiple hidden>
-    <input type="file" id="fPhoto" accept="image/*" multiple hidden>
-    <div id="trs"><div class="mut" style="padding:12px 16px">No transfers yet. Received files appear here with a Save button.</div></div>
-  </div>
-
-  <div class="pane hidden" id="p-dev" style="overflow:auto">
-    <div id="devPC">
-      <div class="card"><b>BATTERY</b><span id="b">Waiting for phone…</span></div>
-      <div class="card"><b>NETWORK</b><span id="n">—</span></div>
-      <div class="card"><b>LOCATION</b><span id="l">—</span>
-        <a id="maplink" href="#" target="_blank" rel="noopener" class="hidden" style="color:#a5b4fc"> · open in Maps</a>
-        <iframe id="map" class="hidden" title="map"></iframe></div>
-      <div class="card"><b>LAST UPDATE</b><span id="u">—</span></div>
-      <div class="row"><button id="bRing">🔔 Ring phone</button></div>
+    <div class="pane hidden" id="p-files">
+      <div class="drop"><div class="row" style="justify-content:center"><button id="bFile">📄 Send files</button><button class="sec" id="bPhoto">🖼 Send photos</button></div><div class="mut" style="margin-top:8px">You can also drag files here</div></div>
+      <input type="file" id="fFile" multiple hidden><input type="file" id="fPhoto" accept="image/*" multiple hidden>
+      <div id="trs" style="display:flex;flex-direction:column;gap:8px"><div class="mut">No transfers yet. Received files appear here with a Save button.</div></div>
     </div>
-    <div id="devPhone" class="hidden">
-      <div class="card"><b>THIS PHONE IS SHARING WITH YOUR PC</b>
-        <div id="mine">Starting…</div></div>
-      <div class="card"><label><input type="checkbox" id="wake" checked> Keep screen on (keeps location and alarm working)</label>
-        <div class="mut" style="margin-top:8px">Updates and the alarm work while this app is open. Tap anywhere once after opening so the alarm sound is allowed.</div></div>
+    <div class="pane hidden" id="p-dev">
+      <div class="card hidden" id="offnote"><b>OFFLINE</b><span id="offtxt">We will notify you the moment it is back online.</span></div>
+      <div id="devPC">
+        <div class="cards">
+          <div class="card"><b>BATTERY</b><span id="b">Waiting for phone…</span><div class="meter"><i id="bi"></i></div></div>
+          <div class="card"><b>NETWORK</b><span id="n">—</span><br><b style="margin-top:8px">LAST UPDATE</b><span id="u">—</span></div>
+          <div class="card" style="grid-column:1/-1"><b>LOCATION</b><span id="l">—</span><a id="maplink" href="#" target="_blank" rel="noopener" class="hidden"> · open in Maps</a>
+            <iframe id="map" class="hidden" title="map" style="width:100%;height:210px;border:0;border-radius:12px;margin-top:8px"></iframe></div>
+        </div>
+        <div class="card needs" style="margin-top:10px"><b>CONTROL YOUR PHONE</b>
+          <div class="g">
+            <button class="tile sec" id="bRing"><span>🔔</span>Ring phone</button>
+            <button class="tile sec" id="bTorch"><span>🔦</span>Flashlight</button>
+            <button class="tile sec" id="bVib"><span>📳</span>Vibrate</button>
+            <button class="tile sec" id="bCam"><span>📷</span>Phone camera</button>
+            <button class="tile sec" id="bScreen"><span>🖥</span>Show my screen</button>
+          </div>
+          <div class="row" style="margin-top:12px;flex-wrap:nowrap"><input type="text" id="sendTxt" placeholder="Send text or link to phone"><button id="bShare">Send</button></div>
+        </div>
+      </div>
+      <div id="devPhone" class="hidden">
+        <div class="card"><b>SHARED WITH YOUR PC</b><div id="mine">Starting…</div></div>
+        <div class="card hidden" id="camon" style="margin-top:10px"><b>CAMERA IS LIVE ON YOUR PC</b><button class="bad" id="bCamStop">Stop camera</button></div>
+        <div class="card" style="margin-top:10px"><label><input type="checkbox" id="wake" checked> Keep screen on (keeps location, alarm and remote control working)</label>
+          <div class="mut" style="margin-top:8px">Tap anywhere once after opening so the alarm sound is allowed. Keep DropLink open for remote control.</div></div>
+      </div>
     </div>
   </div>
-
   <nav>
-    <button data-t="chat" class="on">💬 Chat</button>
-    <button data-t="files">📁 Files</button>
-    <button data-t="dev">📱 Phone</button>
+    <div class="brand" data-logo="84"></div>
+    <button data-t="chat" class="on"><span>💬</span>Chat<i id="bg" class="hidden"></i></button>
+    <button data-t="files"><span>📁</span>Files</button>
+    <button data-t="dev"><span>📱</span><b id="tabDev" style="font-weight:inherit">Phone</b></button>
   </nav>
 </div>
 
 <div id="alarm" class="hidden"><div style="font-size:4rem">🔔</div><div style="font-size:1.6rem">Your PC is ringing this phone</div><button id="bStop">Stop</button></div>
+<div id="rvw" class="modal hidden"><div class="card"><video id="rv" autoplay playsinline muted></video><div class="row"><button id="bSnap">📸 Snapshot</button><button class="sec" id="bRvClose">Close</button></div></div></div>
+<div id="sheet" class="modal hidden"><div class="card"><b id="sh-t"></b><div id="sh-b"></div><div class="row" id="sh-x"></div></div></div>
 <div id="toast" class="hidden"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script>
-const $ = s => document.querySelector(s);
-const sleep = ms => new Promise(r => setTimeout(r, ms));
-const LS = {
-  get: k => { try { return localStorage.getItem(k); } catch { return null; } },
-  set: (k, v) => { try { localStorage.setItem(k, v); } catch {} },
-  del: k => { try { localStorage.removeItem(k); } catch {} }
-};
-const rid = () => 'dl-' + Array.from(crypto.getRandomValues(new Uint8Array(14)), b => (b % 36).toString(36)).join('');
+const $=s=>document.querySelector(s),sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const LS={get:k=>{try{return localStorage.getItem(k)}catch{return null}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch{}},del:k=>{try{localStorage.removeItem(k)}catch{}}};
+const rid=()=>'dl-'+Array.from(crypto.getRandomValues(new Uint8Array(14)),b=>(b%36).toString(36)).join('');
+const ICE={config:{iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'},{urls:'stun:global.stun.twilio.com:3478'}],iceCandidatePoolSize:4}};
+let role=LS.get('dl_role'),hostId=LS.get('dl_host'),peer,conn,pend,retryT,tries=0,lastRx=0,lastSeen=LS.get('dl_seen'),outbox=[],guestPid,hostFails=0,unread=0,curCall;
+const N=()=>role==='host'?'Phone':'PC';
 
-let role = LS.get('dl_role');       // 'host' = PC, 'guest' = phone
-let hostId = LS.get('dl_host');
-let peer = null, conn = null, retryT = null;
+// animated logo
+const LOGO=s=>`<svg class="logo" width="${s}" height="${s}" viewBox="0 0 192 192"><rect width="192" height="192" rx="44" fill="url(#lg)"/><circle class="rp" cx="96" cy="96" r="52"/><circle class="rp d" cx="96" cy="96" r="52"/><circle class="ring" cx="96" cy="96" r="45"/><circle class="dot" cx="96" cy="96" r="15"/></svg>`;
+document.querySelectorAll('[data-logo]').forEach(e=>e.innerHTML=LOGO(e.dataset.logo));
 
-function toast(t) {
-  const el = $('#toast'); el.textContent = t; el.classList.remove('hidden');
-  clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.add('hidden'), 3500);
-}
-function show(id) {
-  ['home', 'pair', 'scan', 'app'].forEach(x => $('#' + x).classList.toggle('hidden', x !== id));
-}
-function setStatus(ok, text) { $('#dot').classList.toggle('ok', ok); $('#stat').textContent = text; }
+function toast(t){const e=$('#toast');e.textContent=t;e.classList.remove('hidden');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.add('hidden'),3500)}
+function show(id){['home','pair','scan','app'].forEach(x=>$('#'+x).classList.toggle('hidden',x!==id))}
+function sheet(t,b,btns){$('#sh-t').textContent=t;$('#sh-b').textContent=b;const bx=$('#sh-x');bx.innerHTML='';btns.forEach(([l,f,c])=>{const e=document.createElement('button');e.textContent=l;if(c)e.className=c;e.onclick=()=>{$('#sheet').classList.add('hidden');f&&f()};bx.appendChild(e)});$('#sheet').classList.remove('hidden')}
 
-// ───────── start ─────────
-function boot() {
-  const m = location.hash.match(/join=([\w-]+)/);
-  if (m) {
-    LS.set('dl_role', 'guest'); LS.set('dl_host', m[1]);
-    role = 'guest'; hostId = m[1];
-    history.replaceState(null, '', location.pathname);
-  }
-  if (typeof Peer === 'undefined' && role) toast('Could not load the connection library. Check your internet.');
-  if (role === 'host') startHost();
-  else if (role === 'guest' && hostId) startGuest();
-  else show('home');
+// sound + notifications
+let actx;function unlockAudio(){try{actx=actx||new(window.AudioContext||window.webkitAudioContext)();actx.resume()}catch{}}
+document.addEventListener('pointerdown',unlockAudio);
+function chime(){if(!actx)return;[660,880].forEach((f,i)=>{const o=actx.createOscillator(),g=actx.createGain(),t=actx.currentTime+i*.14;o.frequency.value=f;g.gain.setValueAtTime(.15,t);g.gain.exponentialRampToValueAtTime(.001,t+.25);o.connect(g);g.connect(actx.destination);o.start(t);o.stop(t+.26)})}
+function askNotif(){try{if('Notification'in window&&Notification.permission==='default')Notification.requestPermission()}catch{}}
+function notify(t,b){toast(t);chime();navigator.vibrate&&navigator.vibrate(120);
+  if(document.hidden&&window.Notification&&Notification.permission==='granted')navigator.serviceWorker.ready.then(r=>r.showNotification(t,{body:b||'',icon:'icon-192.png',badge:'icon-192.png',tag:'dl-presence'})).catch(()=>{})}
+
+// presence
+function setPresence(s,t){document.body.dataset.s=s;
+  const seen=lastSeen?' · last seen '+new Date(+lastSeen).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}):'';
+  $('#stat').textContent=t||(s==='on'?N()+' is online':N()+' is offline'+seen);
+  $('#offnote').classList.toggle('hidden',s==='on');
+  $('#offtxt').textContent=N()+' is offline'+seen+'. You will be notified when it comes back online.'}
+
+// start
+function boot(){
+  const m=location.hash.match(/join=([\w-]+)/);
+  if(m){LS.set('dl_role','guest');LS.set('dl_host',m[1]);role='guest';hostId=m[1];history.replaceState(null,'',location.pathname)}
+  if(typeof Peer==='undefined'&&role)toast('Could not load the connection library. Check your internet.');
+  if(role==='host')startHost();else if(role==='guest'&&hostId)startGuest();else show('home');
+  setTimeout(()=>$('#splash').classList.add('out'),1500);setTimeout(()=>$('#splash').remove(),2100);
+}
+function prep(){
+  $('#devPC').classList.toggle('hidden',role!=='host');$('#devPhone').classList.toggle('hidden',role!=='guest');
+  $('#bQR').classList.toggle('hidden',role!=='host');$('#tabDev').textContent=role==='host'?'Phone':'This phone';
 }
 
-// ───────── PC (host) ─────────
-function pairUrl() { return location.origin + location.pathname + '#join=' + LS.get('dl_id'); }
-function showQR() {
-  const qr = qrcode(0, 'M'); qr.addData(pairUrl()); qr.make();
-  $('#qr').innerHTML = qr.createImgTag(6, 8);
-  $('#pairurl').textContent = pairUrl();
-}
-function startHost() {
-  role = 'host'; LS.set('dl_role', 'host');
-  let id = LS.get('dl_id'); if (!id) { id = rid(); LS.set('dl_id', id); }
-  prepareApp();
-  peer = new Peer(id);
-  peer.on('open', () => { showQR(); if (!(conn && conn.open)) show('pair'); });
-  peer.on('connection', c => { if (conn) { try { conn.close(); } catch {} } setup(c); });
-  peer.on('disconnected', () => { try { peer.reconnect(); } catch {} });
-  peer.on('error', e => {
-    if (e.type === 'unavailable-id') toast('DropLink is already open in another tab or window.');
-    else toast('Connection problem: ' + e.type);
+// PC (host)
+const pairUrl=()=>location.origin+location.pathname+'#join='+LS.get('dl_id');
+function showQR(){const q=qrcode(0,'M');q.addData(pairUrl());q.make();$('#qr').innerHTML=q.createImgTag(6,8);$('#pairurl').textContent=pairUrl()}
+function startHost(){
+  role='host';LS.set('dl_role','host');
+  let id=LS.get('dl_id');if(!id){id=rid();LS.set('dl_id',id)}
+  prep();if(LS.get('dl_paired')&&!(conn&&conn.open)){show('app');setPresence('off')}
+  try{peer&&peer.destroy()}catch{}
+  peer=new Peer(id,ICE);
+  peer.on('open',()=>{tries=0;showQR();if(!LS.get('dl_paired')&&!(conn&&conn.open))show('pair')});
+  peer.on('connection',setup);
+  peer.on('call',onCall);
+  peer.on('disconnected',reco);
+  peer.on('error',e=>{
+    if(e.type==='unavailable-id'){if(++hostFails>4)toast('DropLink is already open in another tab or window.');setTimeout(startHost,2000)}
+    else reco();
   });
 }
+function reco(){clearTimeout(reco.t);reco.t=setTimeout(()=>{if(!peer||peer.destroyed){role==='host'?startHost():startGuest();return}try{peer.reconnect()}catch{}},Math.min(300*2**tries++,4000))}
 
-// ───────── phone (guest) ─────────
-function startGuest() {
-  role = 'guest';
-  prepareApp(); show('app'); setStatus(false, 'Connecting to your PC…');
-  peer = new Peer();
-  peer.on('open', connectToHost);
-  peer.on('disconnected', () => { try { peer.reconnect(); } catch {} });
-  peer.on('error', e => {
-    if (e.type === 'peer-unavailable') { setStatus(false, 'PC is not online. Retrying…'); retry(); }
-    else if (e.type !== 'disconnected') { setStatus(false, 'Problem: ' + e.type + '. Retrying…'); retry(); }
-  });
+// phone (guest)
+function startGuest(){
+  role='guest';prep();show('app');setPresence('wait','Looking for your PC…');
+  try{peer&&peer.destroy()}catch{}
+  peer=new Peer(ICE);
+  peer.on('open',()=>{tries=0;tick()});
+  peer.on('call',onCall);
+  peer.on('disconnected',reco);
+  peer.on('error',e=>{if(e.type==='peer-unavailable'){pend=null;setPresence('off')}else if(e.type!=='disconnected')reco()});
 }
-function connectToHost() {
-  if (conn && conn.open) return;
-  setup(peer.connect(hostId, { reliable: true }));
+function tick(){
+  clearTimeout(retryT);if(role!=='guest'||(conn&&conn.open))return;
+  retryT=setTimeout(tick,Math.min(600*1.5**tries++,4000));
+  if(!peer||peer.destroyed)return startGuest();
+  if(peer.disconnected){try{peer.reconnect()}catch{}return}
+  if(!peer.open||(pend&&!pend.open&&Date.now()-pend.t0<7000))return;
+  try{pend&&pend.close()}catch{}
+  pend=peer.connect(hostId,{reliable:true});pend.t0=Date.now();setup(pend);
 }
-function retry() {
-  clearTimeout(retryT);
-  retryT = setTimeout(() => {
-    if (role !== 'guest' || !peer || peer.destroyed || (conn && conn.open)) return;
-    if (peer.disconnected) peer.reconnect(); else connectToHost();
-  }, 3000);
-}
+const wake=()=>{tries=0;if(role==='guest')tick();else if(peer&&peer.disconnected)reco()};
+addEventListener('online',()=>{toast('Back online. Reconnecting…');wake()});
+addEventListener('offline',()=>toast('You are offline. DropLink will reconnect by itself.'));
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)wake()});
 
-// ───────── shared connection logic ─────────
-function setup(c) {
-  c.on('open', () => { conn = c; onConnected(); });
-  c.on('data', onData);
-  c.on('close', () => { if (conn === c) { conn = null; onDisconnected(); } else if (role === 'guest') retry(); });
-  c.on('error', () => {});
+// shared connection logic
+function setup(c){
+  c.on('open',()=>{if(conn&&conn.open&&conn!==c){try{conn.close()}catch{}}conn=c;pend=null;tries=0;lastRx=Date.now();clearTimeout(retryT);onUp()});
+  c.on('data',m=>{lastRx=Date.now();onData(m)});
+  c.on('close',()=>{if(conn===c){conn=null;onDown()}});
+  c.on('error',()=>{});
 }
-function onConnected() {
-  show('app');
-  setStatus(true, role === 'host' ? 'Phone connected' : 'Connected to PC');
-  if (role === 'guest') { startSensors(); sendStatus(); }
+setInterval(()=>{if(!conn||!conn.open)return;conn.send({t:'hb'});
+  if(Date.now()-lastRx>10000){const c=conn;conn=null;try{c.close()}catch{}onDown()}},3000);
+function onUp(){
+  show('app');LS.set('dl_paired','1');setPresence('on');
+  notify(N()+' is online',role==='host'?'Your phone is connected':'Connected to your PC');
+  send({t:'hello',pid:peer&&peer.id},1);
+  outbox.splice(0).forEach(o=>{conn.send({t:'chat',text:o.t});o.el.classList.remove('q')});
+  if(role==='guest'){startSensors();sendStatus()}
 }
-function onDisconnected() {
-  setStatus(false, role === 'host' ? 'Phone disconnected. Waiting…' : 'Connection lost. Retrying…');
-  if (role === 'guest') { setAlarm(false); retry(); } else show('pair');
+function onDown(){
+  lastSeen=Date.now();LS.set('dl_seen',lastSeen);setPresence('off');toast(N()+' went offline');
+  if(role==='guest'){setAlarm(false);stopCam();torch(false,1);setView(false);wake()}
 }
-function send(o) { if (conn && conn.open) { conn.send(o); return true; } toast('Not connected yet'); return false; }
+function send(o,quiet){if(conn&&conn.open){conn.send(o);return true}if(!quiet)toast(N()+' is offline');return false}
 
-function prepareApp() {
-  $('#devPC').classList.toggle('hidden', role !== 'host');
-  $('#devPhone').classList.toggle('hidden', role !== 'guest');
-}
-
-const incoming = {};
-function onData(m) {
-  switch (m.t) {
-    case 'chat': addMsg(m.text, false); break;
-    case 'status': renderStatus(m); break;
-    case 'alarm': setAlarm(m.on); break;
-    case 'fstart': incoming[m.id] = { name: m.name, size: m.size, parts: [], got: 0, row: addTransfer(m.name, m.size, false) }; break;
-    case 'chunk': {
-      const f = incoming[m.id]; if (!f) break;
-      f.parts.push(m.d); f.got += m.d.byteLength; prog(f.row, f.size ? f.got / f.size : 1); break;
-    }
-    case 'fend': {
-      const f = incoming[m.id]; if (!f) break;
-      const url = URL.createObjectURL(new Blob(f.parts));
-      prog(f.row, 1);
-      f.row.st.innerHTML = '';
-      const a = document.createElement('a'); a.href = url; a.download = f.name; a.textContent = '⬇ Save ' + f.name;
-      f.row.st.appendChild(a);
-      delete incoming[m.id]; toast('Received ' + f.name); break;
-    }
+const incoming={};
+function onData(m){
+  switch(m.t){
+    case 'hello':guestPid=m.pid;break;
+    case 'chat':addMsg(m.text,0);if(document.hidden)notify(N(),m.text);if($('#p-chat').classList.contains('hidden')){unread++;badge()}break;
+    case 'status':renderStatus(m);break;
+    case 'alarm':setAlarm(m.on);break;
+    case 'ack':toast(m.msg);break;
+    case 'cmd':if(role==='guest')cmd(m);break;
+    case 'fstart':incoming[m.id]={name:m.name,size:m.size,type:m.type,parts:[],got:0,row:addTransfer(m.name,m.size,0)};break;
+    case 'chunk':{const f=incoming[m.id];if(!f)break;f.parts.push(m.d);f.got+=m.d.byteLength;f.row.bar.value=f.size?f.got/f.size:1;break}
+    case 'fend':{const f=incoming[m.id];if(!f)break;
+      const blob=new Blob(f.parts,{type:f.type||''}),url=URL.createObjectURL(blob);
+      f.row.bar.value=1;f.row.st.innerHTML='';
+      const a=document.createElement('a');a.href=url;a.download=f.name;a.textContent='⬇ Save '+f.name;f.row.st.appendChild(a);
+      if((f.type||'').startsWith('image/')){const i=new Image();i.src=url;f.row.el.appendChild(i)}
+      delete incoming[m.id];notify('Received '+f.name);break}
   }
 }
+function badge(){const b=$('#bg');b.textContent=unread;b.classList.toggle('hidden',!unread)}
 
-// ───────── chat ─────────
-function addMsg(text, me) {
-  const d = document.createElement('div'); d.className = 'm' + (me ? ' me' : ''); d.textContent = text;
-  const box = $('#msgs'); box.appendChild(d); box.scrollTop = box.scrollHeight;
-}
-function sendChat() {
-  const t = $('#cin').value.trim(); if (!t) return;
-  if (send({ t: 'chat', text: t })) { addMsg(t, true); $('#cin').value = ''; }
-}
+// chat
+function addMsg(text,me){const d=document.createElement('div');d.className='m'+(me?' me':'');d.textContent=text;const b=$('#msgs');b.appendChild(d);b.scrollTop=b.scrollHeight;return d}
+function sendChat(){const t=$('#cin').value.trim();if(!t)return;$('#cin').value='';const el=addMsg(t,1);
+  if(conn&&conn.open)conn.send({t:'chat',text:t});else{el.classList.add('q');outbox.push({t,el})}}
 
-// ───────── files ─────────
-const fmt = b => b < 1024 ? b + ' B' : b < 1048576 ? (b / 1024).toFixed(1) + ' KB' : b < 1073741824 ? (b / 1048576).toFixed(1) + ' MB' : (b / 1073741824).toFixed(2) + ' GB';
-function addTransfer(name, size, sending) {
-  const trs = $('#trs'); if (trs.firstElementChild && trs.firstElementChild.classList.contains('mut')) trs.innerHTML = '';
-  const el = document.createElement('div'); el.className = 'tr';
-  el.innerHTML = '<div></div><progress max="1" value="0"></progress><div class="mut"></div>';
-  el.children[0].textContent = (sending ? '⬆ ' : '⬇ ') + name + ' (' + fmt(size) + ')';
-  trs.prepend(el);
-  return { el, bar: el.children[1], st: el.children[2] };
+// files
+const fmt=b=>b<1024?b+' B':b<1048576?(b/1024).toFixed(1)+' KB':b<1073741824?(b/1048576).toFixed(1)+' MB':(b/1073741824).toFixed(2)+' GB';
+function addTransfer(name,size,sending){
+  const trs=$('#trs');if(trs.firstElementChild&&trs.firstElementChild.classList.contains('mut'))trs.innerHTML='';
+  const el=document.createElement('div');el.className='tr';el.innerHTML='<div></div><progress max="1" value="0"></progress><div class="mut"></div>';
+  el.children[0].textContent=(sending?'⬆ ':'⬇ ')+name+' ('+fmt(size)+')';trs.prepend(el);
+  return{el,bar:el.children[1],st:el.children[2]};
 }
-function prog(row, v) { row.bar.value = v; }
-async function sendFile(file) {
-  if (!conn || !conn.open) { toast('Not connected yet'); return; }
-  const id = Math.random().toString(36).slice(2), CH = 64 * 1024, row = addTransfer(file.name, file.size, true);
-  conn.send({ t: 'fstart', id, name: file.name, size: file.size });
-  for (let o = 0; o < file.size; o += CH) {
-    while (conn && conn.open && conn.dataChannel && conn.dataChannel.bufferedAmount > 1e6) await sleep(20);
-    if (!conn || !conn.open) { row.st.textContent = 'Failed: connection lost'; return; }
-    conn.send({ t: 'chunk', id, d: await file.slice(o, o + CH).arrayBuffer() });
-    prog(row, Math.min(1, (o + CH) / file.size));
+async function sendFile(file){
+  if(!conn||!conn.open){toast(N()+' is offline. Try again when it is online.');return}
+  const id=Math.random().toString(36).slice(2),CH=64*1024,row=addTransfer(file.name,file.size,1);
+  conn.send({t:'fstart',id,name:file.name,size:file.size,type:file.type});
+  for(let o=0;o<file.size;o+=CH){
+    while(conn&&conn.open&&conn.dataChannel&&conn.dataChannel.bufferedAmount>4e6)await sleep(10);
+    if(!conn||!conn.open){row.st.textContent='Failed: connection lost';return}
+    conn.send({t:'chunk',id,d:await file.slice(o,o+CH).arrayBuffer()});row.bar.value=Math.min(1,(o+CH)/file.size);
   }
-  conn.send({ t: 'fend', id }); prog(row, 1); row.st.textContent = 'Sent ✓';
+  conn.send({t:'fend',id});row.bar.value=1;row.st.textContent='Sent ✓';
 }
-async function sendFiles(list) { for (const f of list) await sendFile(f); }
+async function sendFiles(l){for(const f of l)await sendFile(f)}
+addEventListener('dragover',e=>e.preventDefault());
+addEventListener('drop',e=>{e.preventDefault();if(e.dataTransfer.files.length&&!$('#app').classList.contains('hidden')){tab('files');sendFiles([...e.dataTransfer.files])}});
 
-// ───────── phone sensors ─────────
-let bat = null, watchId = null, sensorT = null, wl = null, last = { lat: null, lng: null, acc: null };
-async function startSensors() {
-  if (navigator.getBattery && !bat) {
-    try { bat = await navigator.getBattery(); ['levelchange', 'chargingchange'].forEach(e => bat.addEventListener(e, sendStatus)); } catch {}
-  }
-  if (navigator.geolocation && watchId == null) {
-    watchId = navigator.geolocation.watchPosition(
-      p => { last = { lat: p.coords.latitude, lng: p.coords.longitude, acc: Math.round(p.coords.accuracy) }; sendStatus(); },
-      e => { $('#mine').textContent = 'Location: ' + e.message; },
-      { enableHighAccuracy: true, maximumAge: 5000 });
-  }
-  if (navigator.connection) navigator.connection.addEventListener('change', sendStatus);
-  clearInterval(sensorT); sensorT = setInterval(sendStatus, 5000);
-  setWake($('#wake').checked);
+// phone sensors
+let bat=null,watchId=null,sensorT=null,wl=null,last={lat:null,lng:null,acc:null};
+async function startSensors(){
+  if(navigator.getBattery&&!bat){try{bat=await navigator.getBattery();['levelchange','chargingchange'].forEach(e=>bat.addEventListener(e,sendStatus))}catch{}}
+  if(navigator.geolocation&&watchId==null)watchId=navigator.geolocation.watchPosition(
+    p=>{last={lat:p.coords.latitude,lng:p.coords.longitude,acc:Math.round(p.coords.accuracy)};sendStatus()},
+    e=>{$('#mine').textContent='Location: '+e.message},{enableHighAccuracy:true,maximumAge:5000});
+  if(navigator.connection)navigator.connection.addEventListener('change',sendStatus);
+  clearInterval(sensorT);sensorT=setInterval(sendStatus,5000);setWake($('#wake').checked);
 }
-function sendStatus() {
-  if (role !== 'guest' || !conn || !conn.open) return;
-  const c = navigator.connection || {};
-  const s = {
-    t: 'status', ts: Date.now(),
-    battery: bat ? Math.round(bat.level * 100) : null, charging: bat ? bat.charging : null,
-    online: navigator.onLine, net: c.type || c.effectiveType || null, speed: c.downlink || null,
-    lat: last.lat, lng: last.lng, acc: last.acc
-  };
-  conn.send(s);
-  $('#mine').innerHTML = '';
-  [['Battery', s.battery == null ? 'not available in this browser' : s.battery + '%' + (s.charging ? ' ⚡' : '')],
-   ['Network', (s.online ? (s.net || 'online') : 'offline') + (s.speed ? ' · ' + s.speed + ' Mbps' : '')],
-   ['Location', s.lat == null ? 'waiting… (allow location)' : s.lat.toFixed(5) + ', ' + s.lng.toFixed(5)]]
-    .forEach(([k, v]) => { const d = document.createElement('div'); d.textContent = k + ': ' + v; $('#mine').appendChild(d); });
+function sendStatus(){
+  if(role!=='guest'||!conn||!conn.open)return;
+  const c=navigator.connection||{};
+  const s={t:'status',ts:Date.now(),battery:bat?Math.round(bat.level*100):null,charging:bat?bat.charging:null,online:navigator.onLine,net:c.type||c.effectiveType||null,speed:c.downlink||null,lat:last.lat,lng:last.lng,acc:last.acc};
+  conn.send(s);$('#mine').innerHTML='';
+  [['Battery',s.battery==null?'not available in this browser':s.battery+'%'+(s.charging?' ⚡':'')],['Network',(s.online?(s.net||'online'):'offline')+(s.speed?' · '+s.speed+' Mbps':'')],['Location',s.lat==null?'waiting… (allow location)':s.lat.toFixed(5)+', '+s.lng.toFixed(5)]]
+    .forEach(([k,v])=>{const d=document.createElement('div');d.textContent=k+': '+v;$('#mine').appendChild(d)});
 }
-async function setWake(on) {
-  try { if (on) wl = await navigator.wakeLock.request('screen'); else if (wl) { await wl.release(); wl = null; } } catch {}
-}
-document.addEventListener('visibilitychange', () => { if (!document.hidden && role === 'guest' && $('#wake').checked) setWake(true); });
-$('#wake').addEventListener('change', e => setWake(e.target.checked));
+async function setWake(on){try{if(on)wl=await navigator.wakeLock.request('screen');else if(wl){await wl.release();wl=null}}catch{}}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&role==='guest'&&$('#wake').checked)setWake(true)});
+$('#wake').addEventListener('change',e=>setWake(e.target.checked));
 
-// ───────── PC status view ─────────
-let lastMapKey = '';
-function renderStatus(s) {
-  $('#b').textContent = s.battery == null ? 'Not available on this phone/browser' : s.battery + '%' + (s.charging ? ' ⚡ charging' : '');
-  $('#n').textContent = (s.online === false ? 'Offline' : (s.net || 'Online')) + (s.speed ? ' · ' + s.speed + ' Mbps' : '');
-  if (s.lat != null) {
-    $('#l').textContent = s.lat.toFixed(5) + ', ' + s.lng.toFixed(5) + (s.acc ? ' (±' + s.acc + ' m)' : '');
-    const ml = $('#maplink'); ml.href = 'https://www.google.com/maps?q=' + s.lat + ',' + s.lng; ml.classList.remove('hidden');
-    const key = s.lat.toFixed(4) + ',' + s.lng.toFixed(4);
-    if (key !== lastMapKey) {
-      lastMapKey = key;
-      const d = 0.004, f = $('#map');
-      f.src = 'https://www.openstreetmap.org/export/embed.html?bbox=' + [s.lng - d, s.lat - d * 0.75, s.lng + d, s.lat + d * 0.75].join('%2C') + '&layer=mapnik&marker=' + s.lat + '%2C' + s.lng;
-      f.classList.remove('hidden');
-    }
-  } else $('#l').textContent = 'Waiting for location… (allow it on the phone)';
-  $('#u').textContent = new Date(s.ts).toLocaleTimeString();
+// PC status view
+let lastMapKey='';
+function renderStatus(s){
+  $('#b').textContent=s.battery==null?'Not available on this phone/browser':s.battery+'%'+(s.charging?' ⚡ charging':'');
+  $('#bi').style.width=(s.battery||0)+'%';
+  $('#n').textContent=(s.online===false?'Offline':(s.net||'Online'))+(s.speed?' · '+s.speed+' Mbps':'');
+  if(s.lat!=null){
+    $('#l').textContent=s.lat.toFixed(5)+', '+s.lng.toFixed(5)+(s.acc?' (±'+s.acc+' m)':'');
+    const ml=$('#maplink');ml.href='https://www.google.com/maps?q='+s.lat+','+s.lng;ml.classList.remove('hidden');
+    const key=s.lat.toFixed(4)+','+s.lng.toFixed(4);
+    if(key!==lastMapKey){lastMapKey=key;const d=.004,f=$('#map');
+      f.src='https://www.openstreetmap.org/export/embed.html?bbox='+[s.lng-d,s.lat-d*.75,s.lng+d,s.lat+d*.75].join('%2C')+'&layer=mapnik&marker='+s.lat+'%2C'+s.lng;f.classList.remove('hidden')}
+  }else $('#l').textContent='Waiting for location… (allow it on the phone)';
+  $('#u').textContent=new Date(s.ts).toLocaleTimeString();
 }
 
-// ───────── alarm ─────────
-let actx = null, osc = null, lfo = null, vib = null, ringing = false;
-function unlockAudio() {
-  try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); actx.resume(); } catch {}
+// alarm
+let osc=null,lfo=null,vib=null,ringing=false;
+function setAlarm(on){
+  ringing=on;
+  if(role==='host'){$('#bRing').lastChild.textContent=on?'Stop ringing':'Ring phone';$('#bRing').classList.toggle('on',on);return}
+  $('#alarm').classList.toggle('hidden',!on);
+  if(on){unlockAudio();
+    if(actx&&!osc){osc=actx.createOscillator();lfo=actx.createOscillator();const g=actx.createGain(),lg=actx.createGain();
+      osc.type='square';osc.frequency.value=900;lfo.frequency.value=2;lg.gain.value=300;g.gain.value=.6;
+      lfo.connect(lg);lg.connect(osc.frequency);osc.connect(g);g.connect(actx.destination);osc.start();lfo.start()}
+    if(!vib)vib=setInterval(()=>navigator.vibrate&&navigator.vibrate(600),1000);
+  }else{try{osc&&osc.stop();lfo&&lfo.stop()}catch{}osc=lfo=null;clearInterval(vib);vib=null;navigator.vibrate&&navigator.vibrate(0)}
 }
-document.addEventListener('pointerdown', unlockAudio);
-function setAlarm(on) {
-  ringing = on;
-  if (role === 'host') { $('#bRing').textContent = on ? '🔕 Stop ringing' : '🔔 Ring phone'; return; }
-  $('#alarm').classList.toggle('hidden', !on);
-  if (on) {
-    unlockAudio();
-    if (actx && !osc) {
-      osc = actx.createOscillator(); lfo = actx.createOscillator();
-      const g = actx.createGain(), lg = actx.createGain();
-      osc.type = 'square'; osc.frequency.value = 900; lfo.frequency.value = 2; lg.gain.value = 300; g.gain.value = 0.6;
-      lfo.connect(lg); lg.connect(osc.frequency); osc.connect(g); g.connect(actx.destination);
-      osc.start(); lfo.start();
-    }
-    if (!vib) vib = setInterval(() => navigator.vibrate && navigator.vibrate(600), 1000);
-  } else {
-    try { osc && osc.stop(); lfo && lfo.stop(); } catch {}
-    osc = lfo = null; clearInterval(vib); vib = null; navigator.vibrate && navigator.vibrate(0);
+
+// remote control: runs on the phone
+let tstream=null,cstream=null,ccall=null;
+async function cmd(m){
+  switch(m.c){
+    case 'vib':navigator.vibrate?navigator.vibrate([400,150,400,150,800]):send({t:'ack',msg:'This phone cannot vibrate from a browser'});break;
+    case 'torch':torch(m.on);break;
+    case 'share':{const u=/^https?:\/\/\S+$/.test(m.text);notify('From your PC',m.text.slice(0,80));
+      sheet('Sent from your PC',m.text,[['Copy',()=>navigator.clipboard&&navigator.clipboard.writeText(m.text).then(()=>toast('Copied'))],...(u?[['Open link',()=>window.open(m.text,'_blank','noopener')]]:[]),['Dismiss',null,'sec']]);break}
+    case 'cam':sheet('Camera request','Your PC wants to see through this phone’s camera.',[['Allow',startCam],['Deny',()=>send({t:'ack',msg:'Camera request declined'}),'sec']]);break;
+    case 'camoff':stopCam();break;
   }
 }
-
-// ───────── in-app QR scanner (phone) ─────────
-let scanning = false, stream = null;
-function stopScan() { scanning = false; if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; } }
-function pairWith(id) {
-  LS.set('dl_role', 'guest'); LS.set('dl_host', id); hostId = id;
-  stopScan(); startGuest();
+async function torch(on,quiet){
+  try{
+    if(on){tstream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});await tstream.getVideoTracks()[0].applyConstraints({advanced:[{torch:true}]});send({t:'ack',msg:'Flashlight on'},1)}
+    else if(tstream){tstream.getTracks().forEach(t=>t.stop());tstream=null;quiet||send({t:'ack',msg:'Flashlight off'},1)}
+  }catch{if(tstream){tstream.getTracks().forEach(t=>t.stop());tstream=null}send({t:'ack',msg:'Flashlight is not supported on this phone/browser'},1)}
 }
-async function startScan() {
-  unlockAudio(); show('scan'); $('#scanmsg').textContent = '';
-  if (!('BarcodeDetector' in window)) {
-    $('#vid').classList.add('hidden');
-    $('#scanmsg').textContent = 'This browser cannot scan inside the app. Open your phone’s Camera app and point it at the QR code on the PC, or paste the link below.';
-    return;
-  }
-  try {
-    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-    const v = $('#vid'); v.classList.remove('hidden'); v.srcObject = stream; await v.play();
-    const det = new BarcodeDetector({ formats: ['qr_code'] }); scanning = true;
-    while (scanning) {
-      try {
-        const r = await det.detect(v);
-        const m = r[0] && r[0].rawValue.match(/join=([\w-]+)/);
-        if (m) { pairWith(m[1]); return; }
-      } catch {}
-      await sleep(250);
-    }
-  } catch { $('#scanmsg').textContent = 'Camera not allowed. Allow the camera, or paste the pairing link below.'; }
+async function startCam(){
+  try{cstream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});ccall=peer.call(hostId,cstream);$('#camon').classList.remove('hidden');send({t:'ack',msg:'Camera is live'})}
+  catch{send({t:'ack',msg:'Camera is not available'})}
 }
-
-// ───────── UI wiring ─────────
-$('#bPC').onclick = () => { if (typeof Peer === 'undefined') return toast('Check your internet connection.'); startHost(); };
-$('#bPhone').onclick = startScan;
-$('#bScanBack').onclick = () => { stopScan(); show('home'); };
-$('#bPaste').onclick = () => {
-  const m = $('#paste').value.match(/join=([\w-]+)/);
-  if (m) pairWith(m[1]); else toast('That is not a DropLink pairing link');
+function stopCam(){if(cstream){cstream.getTracks().forEach(t=>t.stop());cstream=null}try{ccall&&ccall.close()}catch{}ccall=null;$('#camon').classList.add('hidden')}
+function setView(on){if(!on){try{curCall&&curCall.close()}catch{}$('#rv').srcObject=null;$('#rvw').classList.add('hidden')}}
+function onCall(call){
+  call.answer();curCall=call;
+  call.on('stream',s=>{const v=$('#rv');v.srcObject=s;$('#rvw').classList.remove('hidden');v.play().catch(()=>{})});
+  call.on('close',()=>{$('#rv').srcObject=null;$('#rvw').classList.add('hidden');camOn(false)});
+}
+// remote control: runs on the PC
+let torchOn=false,camOnF=false;
+function camOn(on){camOnF=on;$('#bCam').classList.toggle('on',on)}
+$('#bRing').onclick=()=>{const on=!ringing;if(send({t:'alarm',on}))setAlarm(on)};
+$('#bTorch').onclick=()=>{torchOn=!torchOn;if(send({t:'cmd',c:'torch',on:torchOn}))$('#bTorch').classList.toggle('on',torchOn);else torchOn=!torchOn};
+$('#bVib').onclick=()=>send({t:'cmd',c:'vib'});
+$('#bCam').onclick=()=>{if(camOnF){send({t:'cmd',c:'camoff'});camOn(false)}else if(send({t:'cmd',c:'cam'}))camOn(true)};
+$('#bScreen').onclick=async()=>{
+  if(!guestPid||!peer)return toast('Phone is not ready yet');
+  try{const s=await navigator.mediaDevices.getDisplayMedia({video:true}),c=peer.call(guestPid,s);
+    $('#bScreen').classList.add('on');const end=()=>{$('#bScreen').classList.remove('on');s.getTracks().forEach(t=>t.stop());try{c.close()}catch{}};
+    s.getVideoTracks()[0].onended=end;c.on('close',end)}
+  catch{toast('Screen sharing was cancelled or is not supported here')}
 };
-$('#bCopy').onclick = () => { navigator.clipboard && navigator.clipboard.writeText(pairUrl()).then(() => toast('Link copied')); };
-$('#bUnpair').onclick = () => {
-  if (!confirm('Unpair this device? You will need to scan a new QR code.')) return;
-  ['dl_role', 'dl_host', 'dl_id'].forEach(LS.del); location.reload();
-};
-$('#bSend').onclick = sendChat;
-$('#cin').addEventListener('keydown', e => { if (e.key === 'Enter') sendChat(); });
-$('#bFile').onclick = () => $('#fFile').click();
-$('#bPhoto').onclick = () => $('#fPhoto').click();
-$('#fFile').onchange = e => { sendFiles([...e.target.files]); e.target.value = ''; };
-$('#fPhoto').onchange = e => { sendFiles([...e.target.files]); e.target.value = ''; };
-$('#bRing').onclick = () => { const on = !ringing; if (send({ t: 'alarm', on })) setAlarm(on); };
-$('#bStop').onclick = () => { setAlarm(false); send({ t: 'alarm', on: false }); };
-document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
-  document.querySelectorAll('nav button').forEach(x => x.classList.toggle('on', x === b));
-  ['chat', 'files', 'dev'].forEach(t => $('#p-' + t).classList.toggle('hidden', t !== b.dataset.t));
-});
+$('#bShare').onclick=()=>{const t=$('#sendTxt').value.trim();if(t&&send({t:'cmd',c:'share',text:t})){$('#sendTxt').value='';toast('Sent to phone')}};
+$('#bSnap').onclick=()=>{const v=$('#rv');if(!v.videoWidth)return;const c=document.createElement('canvas');c.width=v.videoWidth;c.height=v.videoHeight;c.getContext('2d').drawImage(v,0,0);
+  c.toBlob(b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='droplink-'+Date.now()+'.png';a.click()})};
+$('#bRvClose').onclick=()=>{if(role==='host'&&camOnF){send({t:'cmd',c:'camoff'},1);camOn(false)}setView(false)};
+$('#bCamStop').onclick=stopCam;
 
-// ───────── install (PWA) ─────────
-let deferred = null;
-window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferred = e; $('#install').classList.remove('hidden'); });
-$('#install').onclick = async () => { if (deferred) { deferred.prompt(); deferred = null; $('#install').classList.add('hidden'); } };
-if (/iphone|ipad/i.test(navigator.userAgent) && !navigator.standalone) $('#iosHint').classList.remove('hidden');
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+// QR scanner (phone)
+let scanning=false,stream=null;
+function stopScan(){scanning=false;if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}}
+function pairWith(id){LS.set('dl_role','guest');LS.set('dl_host',id);hostId=id;stopScan();startGuest()}
+async function startScan(){
+  unlockAudio();askNotif();show('scan');$('#scanmsg').textContent='';
+  if(!('BarcodeDetector'in window)){$('#vid').classList.add('hidden');$('#scanmsg').textContent='This browser cannot scan inside the app. Open your phone’s Camera app and point it at the QR code on the PC, or paste the link below.';return}
+  try{
+    stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
+    const v=$('#vid');v.classList.remove('hidden');v.srcObject=stream;await v.play();
+    const det=new BarcodeDetector({formats:['qr_code']});scanning=true;
+    while(scanning){try{const r=await det.detect(v),m=r[0]&&r[0].rawValue.match(/join=([\w-]+)/);if(m){pairWith(m[1]);return}}catch{}await sleep(200)}
+  }catch{$('#scanmsg').textContent='Camera not allowed. Allow the camera, or paste the pairing link below.'}
+}
+
+// UI wiring
+function tab(t){document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x.dataset.t===t));['chat','files','dev'].forEach(x=>$('#p-'+x).classList.toggle('hidden',x!==t));if(t==='chat'){unread=0;badge()}}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>tab(b.dataset.t));
+$('#bPC').onclick=()=>{if(typeof Peer==='undefined')return toast('Check your internet connection.');askNotif();startHost()};
+$('#bPhone').onclick=startScan;
+$('#bScanBack').onclick=()=>{stopScan();show('home')};
+$('#bPaste').onclick=()=>{const m=$('#paste').value.match(/join=([\w-]+)/);if(m)pairWith(m[1]);else toast('That is not a DropLink pairing link')};
+$('#bCopy').onclick=()=>{navigator.clipboard&&navigator.clipboard.writeText(pairUrl()).then(()=>toast('Link copied'))};
+$('#bQR').onclick=()=>{$('#bPairBack').classList.remove('hidden');show('pair')};
+$('#bPairBack').onclick=()=>show('app');
+$('#bUnpair').onclick=()=>{if(!confirm('Unpair this device? You will need to scan a new QR code.'))return;['dl_role','dl_host','dl_id','dl_paired','dl_seen'].forEach(LS.del);location.reload()};
+$('#bSend').onclick=sendChat;
+$('#cin').addEventListener('keydown',e=>{if(e.key==='Enter')sendChat()});
+$('#sendTxt').addEventListener('keydown',e=>{if(e.key==='Enter')$('#bShare').click()});
+$('#bFile').onclick=()=>$('#fFile').click();$('#bPhoto').onclick=()=>$('#fPhoto').click();
+$('#fFile').onchange=e=>{sendFiles([...e.target.files]);e.target.value=''};
+$('#fPhoto').onchange=e=>{sendFiles([...e.target.files]);e.target.value=''};
+$('#bStop').onclick=()=>{setAlarm(false);send({t:'alarm',on:false},1)};
+
+// install (PWA)
+let deferred=null;
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e;$('#install').classList.remove('hidden')});
+$('#install').onclick=async()=>{if(deferred){deferred.prompt();deferred=null;$('#install').classList.add('hidden')}};
+if(/iphone|ipad/i.test(navigator.userAgent)&&!navigator.standalone)$('#iosHint').classList.remove('hidden');
+if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 
 boot();
 </script>
