@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>DropLink</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1e1b4b">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{--bg:#0f1020;--card:#1b1d36;--fg:#eef0ff;--mut:#9aa0c8;--acc:#6366f1;--ok:#22c55e;--bad:#ef4444}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--fg);font:16px system-ui,-apple-system,sans-serif;display:flex;flex-direction:column;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+.hidden{display:none!important}
+button,input{font:inherit}
+button{background:var(--acc);color:#fff;border:0;border-radius:12px;padding:12px 18px;cursor:pointer}
+button.sec{background:var(--card);color:var(--fg);border:1px solid #33365a}
+button.bad{background:var(--bad)}
+input[type=text]{background:var(--card);color:var(--fg);border:1px solid #33365a;border-radius:12px;padding:12px;width:100%}
+.screen{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center;overflow:auto}
+.screen h1{margin:0;font-size:2rem}
+.mut{color:var(--mut);font-size:.9rem}
+.big{width:100%;max-width:320px;padding:16px;font-size:1.1rem}
+#qr img{width:260px;height:260px;image-rendering:pixelated;background:#fff;padding:8px;border-radius:12px}
+#pairurl{word-break:break-all;max-width:360px;font-size:.75rem}
+video{width:100%;max-width:360px;border-radius:12px;background:#000}
+header{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--card)}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--bad)}
+.dot.ok{background:var(--ok)}
+header span{flex:1}
+nav{display:flex;background:var(--card)}
+nav button{flex:1;background:none;color:var(--mut);border-radius:0;padding:14px 4px}
+nav button.on{color:#fff;border-top:3px solid var(--acc)}
+.pane{flex:1;min-height:0;display:flex;flex-direction:column}
+#msgs{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:6px}
+.m{max-width:80%;padding:9px 13px;border-radius:14px;background:var(--card);align-self:flex-start;white-space:pre-wrap;word-break:break-word}
+.m.me{background:var(--acc);align-self:flex-end}
+.bar{display:flex;gap:8px;padding:8px}
+.card{background:var(--card);border-radius:14px;padding:14px;margin:8px 12px}
+.card b{display:block;color:var(--mut);font-size:.8rem;margin-bottom:4px}
+.row{display:flex;gap:10px;align-items:center;margin:8px 12px;flex-wrap:wrap}
+.tr{background:var(--card);border-radius:12px;padding:10px 12px;margin:6px 12px}
+.tr progress{width:100%;height:8px}
+.tr a{color:#a5b4fc}
+iframe{width:100%;height:220px;border:0;border-radius:10px;margin-top:8px}
+#alarm{position:fixed;inset:0;background:var(--bad);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;z-index:9;animation:f 1s infinite}
+#alarm button{background:#fff;color:#000;font-size:1.4rem;padding:18px 32px}
+@keyframes f{50%{background:#7f1d1d}}
+#toast{position:fixed;left:50%;bottom:80px;transform:translateX(-50%);background:#000c;padding:10px 16px;border-radius:20px;z-index:10;max-width:90%}
+</style>
+</head>
+<body>
+
+<div id="home" class="screen hidden">
+  <h1>📲 DropLink</h1>
+  <div class="mut">Connect your phone and PC: chat, share files and photos, see battery, network and location.</div>
+  <button class="big" id="bPC">💻 This is my PC</button>
+  <button class="big" id="bPhone">📱 This is my phone</button>
+  <button class="sec big hidden" id="install">⬇ Install app</button>
+  <div class="mut hidden" id="iosHint">iPhone: tap Share, then “Add to Home Screen”.</div>
+</div>
+
+<div id="pair" class="screen hidden">
+  <h1>Pair your phone</h1>
+  <div id="qr" class="mut">Getting your code…</div>
+  <div>On your phone, open DropLink, tap <b>This is my phone</b> and scan this code.<br>You can also scan it with the phone’s normal Camera app.</div>
+  <div id="pairurl" class="mut"></div>
+  <button class="sec" id="bCopy">Copy link</button>
+</div>
+
+<div id="scan" class="screen hidden">
+  <h1>Scan the QR on your PC</h1>
+  <video id="vid" playsinline muted></video>
+  <div id="scanmsg" class="mut"></div>
+  <div class="mut">Or paste the pairing link:</div>
+  <input type="text" id="paste" placeholder="https://…#join=dl-…">
+  <div class="row"><button id="bPaste">Connect</button><button class="sec" id="bScanBack">Back</button></div>
+</div>
+
+<div id="app" class="hidden" style="flex:1;min-height:0;display:flex;flex-direction:column">
+  <header><div class="dot" id="dot"></div><span id="stat">Starting…</span><button class="sec" id="bUnpair">Unpair</button></header>
+
+  <div class="pane" id="p-chat">
+    <div id="msgs"></div>
+    <div class="bar"><input type="text" id="cin" placeholder="Message"><button id="bSend">Send</button></div>
+  </div>
+
+  <div class="pane hidden" id="p-files" style="overflow:auto">
+    <div class="row">
+      <button id="bFile">📄 Send files</button>
+      <button class="sec" id="bPhoto">🖼 Send photos</button>
+    </div>
+    <input type="file" id="fFile" multiple hidden>
+    <input type="file" id="fPhoto" accept="image/*" multiple hidden>
+    <div id="trs"><div class="mut" style="padding:12px 16px">No transfers yet. Received files appear here with a Save button.</div></div>
+  </div>
+
+  <div class="pane hidden" id="p-dev" style="overflow:auto">
+    <div id="devPC">
+      <div class="card"><b>BATTERY</b><span id="b">Waiting for phone…</span></div>
+      <div class="card"><b>NETWORK</b><span id="n">—</span></div>
+      <div class="card"><b>LOCATION</b><span id="l">—</span>
+        <a id="maplink" href="#" target="_blank" rel="noopener" class="hidden" style="color:#a5b4fc"> · open in Maps</a>
+        <iframe id="map" class="hidden" title="map"></iframe></div>
+      <div class="card"><b>LAST UPDATE</b><span id="u">—</span></div>
+      <div class="row"><button id="bRing">🔔 Ring phone</button></div>
+    </div>
+    <div id="devPhone" class="hidden">
+      <div class="card"><b>THIS PHONE IS SHARING WITH YOUR PC</b>
+        <div id="mine">Starting…</div></div>
+      <div class="card"><label><input type="checkbox" id="wake" checked> Keep screen on (keeps location and alarm working)</label>
+        <div class="mut" style="margin-top:8px">Updates and the alarm work while this app is open. Tap anywhere once after opening so the alarm sound is allowed.</div></div>
+    </div>
+  </div>
+
+  <nav>
+    <button data-t="chat" class="on">💬 Chat</button>
+    <button data-t="files">📁 Files</button>
+    <button data-t="dev">📱 Phone</button>
+  </nav>
+</div>
+
+<div id="alarm" class="hidden"><div style="font-size:4rem">🔔</div><div style="font-size:1.6rem">Your PC is ringing this phone</div><button id="bStop">Stop</button></div>
+<div id="toast" class="hidden"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script>
+const $ = s => document.querySelector(s);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const LS = {
+  get: k => { try { return localStorage.getItem(k); } catch { return null; } },
+  set: (k, v) => { try { localStorage.setItem(k, v); } catch {} },
+  del: k => { try { localStorage.removeItem(k); } catch {} }
+};
+const rid = () => 'dl-' + Array.from(crypto.getRandomValues(new Uint8Array(14)), b => (b % 36).toString(36)).join('');
+
+let role = LS.get('dl_role');       // 'host' = PC, 'guest' = phone
+let hostId = LS.get('dl_host');
+let peer = null, conn = null, retryT = null;
+
+function toast(t) {
+  const el = $('#toast'); el.textContent = t; el.classList.remove('hidden');
+  clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.add('hidden'), 3500);
+}
+function show(id) {
+  ['home', 'pair', 'scan', 'app'].forEach(x => $('#' + x).classList.toggle('hidden', x !== id));
+}
+function setStatus(ok, text) { $('#dot').classList.toggle('ok', ok); $('#stat').textContent = text; }
+
+// ───────── start ─────────
+function boot() {
+  const m = location.hash.match(/join=([\w-]+)/);
+  if (m) {
+    LS.set('dl_role', 'guest'); LS.set('dl_host', m[1]);
+    role = 'guest'; hostId = m[1];
+    history.replaceState(null, '', location.pathname);
+  }
+  if (typeof Peer === 'undefined' && role) toast('Could not load the connection library. Check your internet.');
+  if (role === 'host') startHost();
+  else if (role === 'guest' && hostId) startGuest();
+  else show('home');
+}
+
+// ───────── PC (host) ─────────
+function pairUrl() { return location.origin + location.pathname + '#join=' + LS.get('dl_id'); }
+function showQR() {
+  const qr = qrcode(0, 'M'); qr.addData(pairUrl()); qr.make();
+  $('#qr').innerHTML = qr.createImgTag(6, 8);
+  $('#pairurl').textContent = pairUrl();
+}
+function startHost() {
+  role = 'host'; LS.set('dl_role', 'host');
+  let id = LS.get('dl_id'); if (!id) { id = rid(); LS.set('dl_id', id); }
+  prepareApp();
+  peer = new Peer(id);
+  peer.on('open', () => { showQR(); if (!(conn && conn.open)) show('pair'); });
+  peer.on('connection', c => { if (conn) { try { conn.close(); } catch {} } setup(c); });
+  peer.on('disconnected', () => { try { peer.reconnect(); } catch {} });
+  peer.on('error', e => {
+    if (e.type === 'unavailable-id') toast('DropLink is already open in another tab or window.');
+    else toast('Connection problem: ' + e.type);
+  });
+}
+
+// ───────── phone (guest) ─────────
+function startGuest() {
+  role = 'guest';
+  prepareApp(); show('app'); setStatus(false, 'Connecting to your PC…');
+  peer = new Peer();
+  peer.on('open', connectToHost);
+  peer.on('disconnected', () => { try { peer.reconnect(); } catch {} });
+  peer.on('error', e => {
+    if (e.type === 'peer-unavailable') { setStatus(false, 'PC is not online. Retrying…'); retry(); }
+    else if (e.type !== 'disconnected') { setStatus(false, 'Problem: ' + e.type + '. Retrying…'); retry(); }
+  });
+}
+function connectToHost() {
+  if (conn && conn.open) return;
+  setup(peer.connect(hostId, { reliable: true }));
+}
+function retry() {
+  clearTimeout(retryT);
+  retryT = setTimeout(() => {
+    if (role !== 'guest' || !peer || peer.destroyed || (conn && conn.open)) return;
+    if (peer.disconnected) peer.reconnect(); else connectToHost();
+  }, 3000);
+}
+
+// ───────── shared connection logic ─────────
+function setup(c) {
+  c.on('open', () => { conn = c; onConnected(); });
+  c.on('data', onData);
+  c.on('close', () => { if (conn === c) { conn = null; onDisconnected(); } else if (role === 'guest') retry(); });
+  c.on('error', () => {});
+}
+function onConnected() {
+  show('app');
+  setStatus(true, role === 'host' ? 'Phone connected' : 'Connected to PC');
+  if (role === 'guest') { startSensors(); sendStatus(); }
+}
+function onDisconnected() {
+  setStatus(false, role === 'host' ? 'Phone disconnected. Waiting…' : 'Connection lost. Retrying…');
+  if (role === 'guest') { setAlarm(false); retry(); } else show('pair');
+}
+function send(o) { if (conn && conn.open) { conn.send(o); return true; } toast('Not connected yet'); return false; }
+
+function prepareApp() {
+  $('#devPC').classList.toggle('hidden', role !== 'host');
+  $('#devPhone').classList.toggle('hidden', role !== 'guest');
+}
+
+const incoming = {};
+function onData(m) {
+  switch (m.t) {
+    case 'chat': addMsg(m.text, false); break;
+    case 'status': renderStatus(m); break;
+    case 'alarm': setAlarm(m.on); break;
+    case 'fstart': incoming[m.id] = { name: m.name, size: m.size, parts: [], got: 0, row: addTransfer(m.name, m.size, false) }; break;
+    case 'chunk': {
+      const f = incoming[m.id]; if (!f) break;
+      f.parts.push(m.d); f.got += m.d.byteLength; prog(f.row, f.size ? f.got / f.size : 1); break;
+    }
+    case 'fend': {
+      const f = incoming[m.id]; if (!f) break;
+      const url = URL.createObjectURL(new Blob(f.parts));
+      prog(f.row, 1);
+      f.row.st.innerHTML = '';
+      const a = document.createElement('a'); a.href = url; a.download = f.name; a.textContent = '⬇ Save ' + f.name;
+      f.row.st.appendChild(a);
+      delete incoming[m.id]; toast('Received ' + f.name); break;
+    }
+  }
+}
+
+// ───────── chat ─────────
+function addMsg(text, me) {
+  const d = document.createElement('div'); d.className = 'm' + (me ? ' me' : ''); d.textContent = text;
+  const box = $('#msgs'); box.appendChild(d); box.scrollTop = box.scrollHeight;
+}
+function sendChat() {
+  const t = $('#cin').value.trim(); if (!t) return;
+  if (send({ t: 'chat', text: t })) { addMsg(t, true); $('#cin').value = ''; }
+}
+
+// ───────── files ─────────
+const fmt = b => b < 1024 ? b + ' B' : b < 1048576 ? (b / 1024).toFixed(1) + ' KB' : b < 1073741824 ? (b / 1048576).toFixed(1) + ' MB' : (b / 1073741824).toFixed(2) + ' GB';
+function addTransfer(name, size, sending) {
+  const trs = $('#trs'); if (trs.firstElementChild && trs.firstElementChild.classList.contains('mut')) trs.innerHTML = '';
+  const el = document.createElement('div'); el.className = 'tr';
+  el.innerHTML = '<div></div><progress max="1" value="0"></progress><div class="mut"></div>';
+  el.children[0].textContent = (sending ? '⬆ ' : '⬇ ') + name + ' (' + fmt(size) + ')';
+  trs.prepend(el);
+  return { el, bar: el.children[1], st: el.children[2] };
+}
+function prog(row, v) { row.bar.value = v; }
+async function sendFile(file) {
+  if (!conn || !conn.open) { toast('Not connected yet'); return; }
+  const id = Math.random().toString(36).slice(2), CH = 64 * 1024, row = addTransfer(file.name, file.size, true);
+  conn.send({ t: 'fstart', id, name: file.name, size: file.size });
+  for (let o = 0; o < file.size; o += CH) {
+    while (conn && conn.open && conn.dataChannel && conn.dataChannel.bufferedAmount > 1e6) await sleep(20);
+    if (!conn || !conn.open) { row.st.textContent = 'Failed: connection lost'; return; }
+    conn.send({ t: 'chunk', id, d: await file.slice(o, o + CH).arrayBuffer() });
+    prog(row, Math.min(1, (o + CH) / file.size));
+  }
+  conn.send({ t: 'fend', id }); prog(row, 1); row.st.textContent = 'Sent ✓';
+}
+async function sendFiles(list) { for (const f of list) await sendFile(f); }
+
+// ───────── phone sensors ─────────
+let bat = null, watchId = null, sensorT = null, wl = null, last = { lat: null, lng: null, acc: null };
+async function startSensors() {
+  if (navigator.getBattery && !bat) {
+    try { bat = await navigator.getBattery(); ['levelchange', 'chargingchange'].forEach(e => bat.addEventListener(e, sendStatus)); } catch {}
+  }
+  if (navigator.geolocation && watchId == null) {
+    watchId = navigator.geolocation.watchPosition(
+      p => { last = { lat: p.coords.latitude, lng: p.coords.longitude, acc: Math.round(p.coords.accuracy) }; sendStatus(); },
+      e => { $('#mine').textContent = 'Location: ' + e.message; },
+      { enableHighAccuracy: true, maximumAge: 5000 });
+  }
+  if (navigator.connection) navigator.connection.addEventListener('change', sendStatus);
+  clearInterval(sensorT); sensorT = setInterval(sendStatus, 5000);
+  setWake($('#wake').checked);
+}
+function sendStatus() {
+  if (role !== 'guest' || !conn || !conn.open) return;
+  const c = navigator.connection || {};
+  const s = {
+    t: 'status', ts: Date.now(),
+    battery: bat ? Math.round(bat.level * 100) : null, charging: bat ? bat.charging : null,
+    online: navigator.onLine, net: c.type || c.effectiveType || null, speed: c.downlink || null,
+    lat: last.lat, lng: last.lng, acc: last.acc
+  };
+  conn.send(s);
+  $('#mine').innerHTML = '';
+  [['Battery', s.battery == null ? 'not available in this browser' : s.battery + '%' + (s.charging ? ' ⚡' : '')],
+   ['Network', (s.online ? (s.net || 'online') : 'offline') + (s.speed ? ' · ' + s.speed + ' Mbps' : '')],
+   ['Location', s.lat == null ? 'waiting… (allow location)' : s.lat.toFixed(5) + ', ' + s.lng.toFixed(5)]]
+    .forEach(([k, v]) => { const d = document.createElement('div'); d.textContent = k + ': ' + v; $('#mine').appendChild(d); });
+}
+async function setWake(on) {
+  try { if (on) wl = await navigator.wakeLock.request('screen'); else if (wl) { await wl.release(); wl = null; } } catch {}
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden && role === 'guest' && $('#wake').checked) setWake(true); });
+$('#wake').addEventListener('change', e => setWake(e.target.checked));
+
+// ───────── PC status view ─────────
+let lastMapKey = '';
+function renderStatus(s) {
+  $('#b').textContent = s.battery == null ? 'Not available on this phone/browser' : s.battery + '%' + (s.charging ? ' ⚡ charging' : '');
+  $('#n').textContent = (s.online === false ? 'Offline' : (s.net || 'Online')) + (s.speed ? ' · ' + s.speed + ' Mbps' : '');
+  if (s.lat != null) {
+    $('#l').textContent = s.lat.toFixed(5) + ', ' + s.lng.toFixed(5) + (s.acc ? ' (±' + s.acc + ' m)' : '');
+    const ml = $('#maplink'); ml.href = 'https://www.google.com/maps?q=' + s.lat + ',' + s.lng; ml.classList.remove('hidden');
+    const key = s.lat.toFixed(4) + ',' + s.lng.toFixed(4);
+    if (key !== lastMapKey) {
+      lastMapKey = key;
+      const d = 0.004, f = $('#map');
+      f.src = 'https://www.openstreetmap.org/export/embed.html?bbox=' + [s.lng - d, s.lat - d * 0.75, s.lng + d, s.lat + d * 0.75].join('%2C') + '&layer=mapnik&marker=' + s.lat + '%2C' + s.lng;
+      f.classList.remove('hidden');
+    }
+  } else $('#l').textContent = 'Waiting for location… (allow it on the phone)';
+  $('#u').textContent = new Date(s.ts).toLocaleTimeString();
+}
+
+// ───────── alarm ─────────
+let actx = null, osc = null, lfo = null, vib = null, ringing = false;
+function unlockAudio() {
+  try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); actx.resume(); } catch {}
+}
+document.addEventListener('pointerdown', unlockAudio);
+function setAlarm(on) {
+  ringing = on;
+  if (role === 'host') { $('#bRing').textContent = on ? '🔕 Stop ringing' : '🔔 Ring phone'; return; }
+  $('#alarm').classList.toggle('hidden', !on);
+  if (on) {
+    unlockAudio();
+    if (actx && !osc) {
+      osc = actx.createOscillator(); lfo = actx.createOscillator();
+      const g = actx.createGain(), lg = actx.createGain();
+      osc.type = 'square'; osc.frequency.value = 900; lfo.frequency.value = 2; lg.gain.value = 300; g.gain.value = 0.6;
+      lfo.connect(lg); lg.connect(osc.frequency); osc.connect(g); g.connect(actx.destination);
+      osc.start(); lfo.start();
+    }
+    if (!vib) vib = setInterval(() => navigator.vibrate && navigator.vibrate(600), 1000);
+  } else {
+    try { osc && osc.stop(); lfo && lfo.stop(); } catch {}
+    osc = lfo = null; clearInterval(vib); vib = null; navigator.vibrate && navigator.vibrate(0);
+  }
+}
+
+// ───────── in-app QR scanner (phone) ─────────
+let scanning = false, stream = null;
+function stopScan() { scanning = false; if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; } }
+function pairWith(id) {
+  LS.set('dl_role', 'guest'); LS.set('dl_host', id); hostId = id;
+  stopScan(); startGuest();
+}
+async function startScan() {
+  unlockAudio(); show('scan'); $('#scanmsg').textContent = '';
+  if (!('BarcodeDetector' in window)) {
+    $('#vid').classList.add('hidden');
+    $('#scanmsg').textContent = 'This browser cannot scan inside the app. Open your phone’s Camera app and point it at the QR code on the PC, or paste the link below.';
+    return;
+  }
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+    const v = $('#vid'); v.classList.remove('hidden'); v.srcObject = stream; await v.play();
+    const det = new BarcodeDetector({ formats: ['qr_code'] }); scanning = true;
+    while (scanning) {
+      try {
+        const r = await det.detect(v);
+        const m = r[0] && r[0].rawValue.match(/join=([\w-]+)/);
+        if (m) { pairWith(m[1]); return; }
+      } catch {}
+      await sleep(250);
+    }
+  } catch { $('#scanmsg').textContent = 'Camera not allowed. Allow the camera, or paste the pairing link below.'; }
+}
+
+// ───────── UI wiring ─────────
+$('#bPC').onclick = () => { if (typeof Peer === 'undefined') return toast('Check your internet connection.'); startHost(); };
+$('#bPhone').onclick = startScan;
+$('#bScanBack').onclick = () => { stopScan(); show('home'); };
+$('#bPaste').onclick = () => {
+  const m = $('#paste').value.match(/join=([\w-]+)/);
+  if (m) pairWith(m[1]); else toast('That is not a DropLink pairing link');
+};
+$('#bCopy').onclick = () => { navigator.clipboard && navigator.clipboard.writeText(pairUrl()).then(() => toast('Link copied')); };
+$('#bUnpair').onclick = () => {
+  if (!confirm('Unpair this device? You will need to scan a new QR code.')) return;
+  ['dl_role', 'dl_host', 'dl_id'].forEach(LS.del); location.reload();
+};
+$('#bSend').onclick = sendChat;
+$('#cin').addEventListener('keydown', e => { if (e.key === 'Enter') sendChat(); });
+$('#bFile').onclick = () => $('#fFile').click();
+$('#bPhoto').onclick = () => $('#fPhoto').click();
+$('#fFile').onchange = e => { sendFiles([...e.target.files]); e.target.value = ''; };
+$('#fPhoto').onchange = e => { sendFiles([...e.target.files]); e.target.value = ''; };
+$('#bRing').onclick = () => { const on = !ringing; if (send({ t: 'alarm', on })) setAlarm(on); };
+$('#bStop').onclick = () => { setAlarm(false); send({ t: 'alarm', on: false }); };
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('nav button').forEach(x => x.classList.toggle('on', x === b));
+  ['chat', 'files', 'dev'].forEach(t => $('#p-' + t).classList.toggle('hidden', t !== b.dataset.t));
+});
+
+// ───────── install (PWA) ─────────
+let deferred = null;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferred = e; $('#install').classList.remove('hidden'); });
+$('#install').onclick = async () => { if (deferred) { deferred.prompt(); deferred = null; $('#install').classList.add('hidden'); } };
+if (/iphone|ipad/i.test(navigator.userAgent) && !navigator.standalone) $('#iosHint').classList.remove('hidden');
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+
+boot();
+</script>
+</body>
+</html>
