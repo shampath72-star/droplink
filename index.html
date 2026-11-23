@@ -395,7 +395,7 @@ document.addEventListener('pointerdown',unlockAudio);
 function chime(){if(!actx||!S.sound)return;[660,880].forEach((f,i)=>{const o=actx.createOscillator(),g=actx.createGain(),t=actx.currentTime+i*.14;o.frequency.value=f;g.gain.setValueAtTime(.15,t);g.gain.exponentialRampToValueAtTime(.001,t+.25);o.connect(g);g.connect(actx.destination);o.start(t);o.stop(t+.26)})}
 function askNotif(){try{if('Notification'in window&&Notification.permission==='default')Notification.requestPermission()}catch{}}
 function notify(t,b){toast(t);chime();if(S.vib&&navigator.vibrate)navigator.vibrate(120);
-  if(S.notif&&document.hidden&&window.Notification&&Notification.permission==='granted')navigator.serviceWorker.ready.then(r=>r.showNotification(t,{body:b||'',icon:'icon-192.png',badge:'icon-192.png',tag:'dl-presence'})).catch(()=>{})}
+  if(S.notif&&(document.hidden||!document.hasFocus())&&window.Notification&&Notification.permission==='granted')navigator.serviceWorker.ready.then(r=>r.showNotification(t,{body:b||'',icon:'icon-192.png',badge:'icon-192.png',tag:'dl-'+Date.now(),renotify:true,vibrate:[120,60,120],data:{t:Date.now()}})).catch(()=>{})}
 
 // presence
 const N=()=>peerName||(role==='host'?'Phone':'PC');
@@ -528,7 +528,7 @@ function onData(m){
     case 'pong':rtt=Math.max(1,Date.now()-m.n);paintStat();break;
     case 'hello':otherPid=m.pid;if(m.name){peerName=m.name;paintStat()}break;
     case 'deny':denied=true;clearTimeout(retryT);toast('Pairing key rejected. Scan the QR code on your PC again.');setPresence('off','Pairing rejected. Scan the QR again.');break;
-    case 'chat':{const rec={t:m.text,me:0,ts:Date.now()};chat.push(rec);saveChat();addMsg(rec);if(document.hidden)notify(N(),m.text);else chime();if($('#p-chat').classList.contains('hidden')){unread++;badge()}break}
+    case 'chat':{const rec={t:m.text,me:0,ts:Date.now()};chat.push(rec);saveChat();addMsg(rec);if(document.hidden||!document.hasFocus())notify(N(),m.text);else chime();if($('#p-chat').classList.contains('hidden')){unread++;badge()}break}
     case 'status':m.rx=Date.now();renderStatus(m);storeLast(m);break;
     case 'alarm':ring(m.on);break;
     case 'alarmoff':ringOut=false;paintRing();break;

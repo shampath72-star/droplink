@@ -1,4 +1,4 @@
-const C = 'droplink-v3';
+const C = 'droplink-v4';
 const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png',
   'https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js',
   'https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js',
@@ -46,4 +46,14 @@ self.addEventListener('fetch', e => {
 self.addEventListener('notificationclick', e => {
   e.notification.close();
   e.waitUntil(clients.matchAll({ type: 'window', includeUncontrolled: true }).then(l => l[0] ? l[0].focus() : clients.openWindow('./')));
+});
+
+// Push from a server (works even when the app is closed, once a push server is connected)
+self.addEventListener('push', e => {
+  let d = {};
+  try { d = e.data ? e.data.json() : {}; } catch { d = { body: e.data && e.data.text() }; }
+  e.waitUntil(self.registration.showNotification(d.title || 'DropLink', {
+    body: d.body || 'New message', icon: 'icon-192.png', badge: 'icon-192.png',
+    tag: d.tag || 'dl-' + Date.now(), renotify: true, vibrate: [120, 60, 120]
+  }));
 });
